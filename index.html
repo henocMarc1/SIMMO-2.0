@@ -23,6 +23,11 @@
 <header class="header">
     <div class="header-content">
         <div class="header-left">
+            <!-- >> INSÉRER juste après la div.logo dans .header-content -->
+<button id="mobileMenuBtn" class="mobile-menu" aria-label="Ouvrir le menu">
+  <span class="mobile-menu-icon">☰</span>
+</button>
+
             <div class="logo">
     <img src="logo.jpeg" style="height: 40px; width: 40px; border-radius: 50%;" />  
                 <span class="logo-text">SIMMO 2.0 GESTION</span>
@@ -526,6 +531,24 @@ window.addEventListener('load', () => {
   }
 });
 </script>
+<!-- >> INSÉRER juste avant la fin de </body> -->
+<nav class="bottom-nav" aria-hidden="true">
+  <button class="bottom-nav-btn nav-tab active" data-tab="dashboard" aria-label="Tableau de bord">
+    <i class="fas fa-chart-bar"></i><span>Accueil</span>
+  </button>
+  <button class="bottom-nav-btn nav-tab" data-tab="members" aria-label="Membres">
+    <i class="fas fa-users"></i><span>Membres</span>
+  </button>
+  <button class="bottom-nav-btn nav-tab" data-tab="lots" aria-label="Lots">
+    <i class="fas fa-home"></i><span>Lots</span>
+  </button>
+  <button class="bottom-nav-btn nav-tab" data-tab="payments" aria-label="Paiements">
+    <i class="fas fa-credit-card"></i><span>Paiements</span>
+  </button>
+  <button class="bottom-nav-btn nav-tab" data-tab="statistics" aria-label="Statistiques">
+    <i class="fas fa-chart-line"></i><span>Stats</span>
+  </button>
+</nav>
 
 </body>
 </html>

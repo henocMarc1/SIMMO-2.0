@@ -3094,3 +3094,86 @@ let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new PaymentManager();
 });
+/* ---------- Mobile menu toggle (ajouter à la fin de script.js) ---------- */
+(function(){
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+  if(!mobileBtn) return;
+
+  // créer overlay DOM (si pas présent)
+  let overlay = document.querySelector('.mobile-nav-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.className = 'mobile-nav-overlay';
+    overlay.innerHTML = `
+      <div class="mobile-nav-panel" role="dialog" aria-modal="true">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong style="font-size:16px">Menu</strong>
+          <button id="mobileMenuClose" style="border:none;background:transparent;font-size:20px;cursor:pointer">✕</button>
+        </div>
+        <div class="mobile-nav-list">
+          ${Array.from(document.querySelectorAll('.header-nav .nav-tab')).map(btn=>{
+            const label = btn.textContent.trim();
+            const tab = btn.getAttribute('data-tab') || '';
+            return `<button class="nav-tab" data-tab="${tab}">${btn.innerHTML}</button>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  const panel = overlay.querySelector('.mobile-nav-panel');
+  const closeBtn = document.getElementById('mobileMenuClose');
+
+  function openMobileMenu(){
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileMenu(){
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+
+  mobileBtn.addEventListener('click', openMobileMenu);
+  closeBtn && closeBtn.addEventListener('click', closeMobileMenu);
+  overlay.addEventListener('click', (e)=>{
+    if(e.target === overlay) closeMobileMenu();
+  });
+
+  // when user clicks any nav inside overlay -> switch tab (reuse existing handlers)
+  overlay.addEventListener('click', (e)=>{
+    const t = e.target.closest('.nav-tab');
+    if(!t) return;
+    const tabName = t.getAttribute('data-tab');
+    if(tabName){
+      // simulate click on desktop nav-tab counterpart (so existing logic runs)
+      const desktop = document.querySelector('.header-nav .nav-tab[data-tab="'+tabName+'"]');
+      if(desktop) desktop.click();
+    }
+    closeMobileMenu();
+  });
+
+  // bottom nav syncing
+  const bottomBtns = document.querySelectorAll('.bottom-nav .nav-tab');
+  bottomBtns.forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const tab = b.getAttribute('data-tab');
+      // trigger desktop nav button
+      const desktop = document.querySelector('.header-nav .nav-tab[data-tab="'+tab+'"]');
+      if(desktop) desktop.click();
+      // update active styles
+      document.querySelectorAll('.bottom-nav .nav-tab').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      // ensure we close mobile panel if open
+      const ov = document.querySelector('.mobile-nav-overlay');
+      if(ov && ov.style.display === 'flex') ov.style.display = 'none';
+    });
+  });
+
+  // close overlay when content changed by your existing tab logic (optional)
+  // si tu as un event dispatcher lors du changement d'onglet, lier ici:
+  // document.addEventListener('app:tabChange', closeMobileMenu);
+
+})();
