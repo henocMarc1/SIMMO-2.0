@@ -5,18 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#6366F1">
   <title>SIMMO 2.0 GESTION</title>
-
-  <!-- Icônes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Manifest PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles_complet_adapte.css">
 </head>
 <body>
 
@@ -54,33 +44,12 @@
       </nav>
     </aside>
 
-    <!-- MAIN CONTENT (wrap original HTML here) -->
+    <!-- MAIN CONTENT -->
     <main class="app-container">
-    <!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-      <link rel="manifest" href="manifest.json">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMMO 2.0 </title>
-    <link rel="shortcut icon" href="logo.ico" type="image/x-icon" sizes="16x16" border-radius: "20px">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="auth-protect.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<link rel="stylesheet" href="styles.mobile.css"> 
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-</head>
-<body>
+      
+
+
+
     <div class="app-container">
 <header class="header">
     <div class="header-content">
@@ -595,8 +564,8 @@ window.addEventListener('load', () => {
 </script>
 
 
-</body>
-</html>
+
+
 
     </main>
   </div>
@@ -627,7 +596,7 @@ window.addEventListener('load', () => {
     </div>
   </div>
 
-  <!-- JS: navigation + mobile menu + SW registration -->
+  <!-- JS -->
   <script>
     function showTab(tabId) {
       if (!tabId) return;
@@ -665,10 +634,6 @@ window.addEventListener('load', () => {
     if (fab) fab.addEventListener('click', () => {
       alert('Action principale (ajouter)');
     });
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
-    }
   </script>
 </body>
 </html>
