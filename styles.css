@@ -6063,3 +6063,201 @@ body.standalone {
   .logo { gap:8px; }
   .user-name { display:none; }
 }
+
+/* ==== RESET ==== */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(180deg, #F6F8FF 0%, #FFFFFF 100%);
+  color: #1F2937;
+  height: 100%;
+}
+
+/* Safe-area iPhone */
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+/* ==== APP BAR ==== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  padding-top: var(--safe-top);
+  background: linear-gradient(90deg, #6366F1, #8B5CF6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-bottom: none;
+}
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* ==== MAIN CONTAINER ==== */
+.app-container {
+  padding: 70px 16px 100px; /* espace pour header et bottom nav */
+  max-width: 600px;
+  margin: auto;
+}
+
+/* ==== CARDS ==== */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  padding: 16px;
+  margin: 12px 0;
+  transition: transform 0.2s;
+}
+.card:hover {
+  transform: translateY(-2px);
+}
+.card-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.card-subtitle {
+  font-size: 14px;
+  color: #6B7280;
+}
+
+/* ==== BUTTONS ==== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 15px;
+  transition: 0.2s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #fff;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+}
+.btn-small {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* ==== FLOATING ACTION BUTTON ==== */
+.fab {
+  position: fixed;
+  bottom: calc(80px + var(--safe-bottom));
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 26px;
+  box-shadow: 0 10px 20px rgba(99,102,241,0.25);
+  cursor: pointer;
+  z-index: 1200;
+}
+
+/* ==== BOTTOM NAVIGATION ==== */
+.bottom-nav {
+  position: fixed;
+  bottom: calc(12px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  height: 60px;
+  background: #fff;
+  border-radius: 30px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+  z-index: 1000;
+}
+.bottom-nav-btn {
+  flex: 1;
+  text-align: center;
+  font-size: 22px;
+  color: #9CA3AF;
+  transition: color 0.3s ease;
+}
+.bottom-nav-btn.active {
+  color: #6366F1;
+}
+
+/* ==== MODAL ==== */
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1500;
+}
+.modal.active { display: flex; }
+.modal-content {
+  background: #fff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ==== TABS (mobile) ==== */
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* ==== TABLE (optionnel sur mobile) ==== */
+.table-container {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 14px;
+}
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #E5E7EB;
+  text-align: left;
+}
+th {
+  background: #F9FAFB;
+  font-weight: 600;
+}
