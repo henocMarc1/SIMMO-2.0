@@ -5810,82 +5810,256 @@ body {
     border-radius: 0 0 16px 16px !important;
 }
 
-
-/* Styles pour le menu FAB */
 @media (max-width: 768px) {
-    .fab-menu-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 2000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s ease;
+    .modal-overlay {
+        padding: 10px;
     }
-
-    .fab-menu-overlay.active {
-        opacity: 1;
+    
+    .modal-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 12px !important;
     }
-
-    .fab-menu {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        transform: scale(0.8);
-        transition: transform 0.3s ease;
-        max-width: 280px;
-        width: 90%;
+    
+    .modal-header {
+        padding: 16px 16px 12px 16px;
+        border-radius: 12px 12px 0 0 !important;
     }
-
-    .fab-menu-overlay.active .fab-menu {
-        transform: scale(1);
-    }
-
-    .fab-menu-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+    
+    .modal-content {
         padding: 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin-bottom: 8px;
+        border-radius: 0 0 12px 12px !important;
     }
+}
 
-    .fab-menu-item:hover {
-        background: #f8f9fa;
-    }
+.modal-container {
+    animation: modalSlideIn 0.3s ease-out;
+}
 
-    .fab-menu-item i {
-        width: 24px;
-        color: #6366F1;
-        font-size: 16px;
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
     }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
 
-    .fab-menu-item span {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--text-primary);
-    }
+.pdf-report-container {
+    font-family: 'Inter', sans-serif;
+    color: #2C3E50;
+    padding: 24px;
+    width: 1200px; 
+    background: #ffffff;
+}
+.pdf-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.pdf-logo-icon img { border-radius:50%; }
+.pdf-metrics-grid { display:flex; gap:12px; margin-bottom:12px; }
+.pdf-metric-card { background:#fff; border-radius:8px; padding:12px; box-shadow:0 2px 6px rgba(0,0,0,0.06); flex:1; text-align:center; }
+.pdf-section { margin-top:18px; }
+.pdf-table { width:100%; border-collapse:collapse; margin-top:8px; }
+.pdf-table th, .pdf-table td { border:1px solid #e8e8e8; padding:8px; text-align:left; font-size:12px; }
+.pdf-footer { margin-top:20px; font-size:12px; color:#6b7280; }
 
-    .fab-menu-close {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        color: #6c757d;
-    }
+.pdf-report-container.receipt-vertical {
+    background: #fff;
+    color: #222;
+    max-width: 760px;
+    margin: 0 auto; 
+    box-shadow: none;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+.receipt { max-width: 680px; margin: 0 auto; } 
+.receipt .receipt-header { display:block; text-align:center; }
+.receipt .receipt-row { display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dotted #eee; }
+.receipt .receipt-label { font-weight:700; color:#333; width:160px; }
+.receipt-amount { text-align:center; }
+.receipt-amount-value { letter-spacing:1px; }
+.receipt-signatures { display:flex; gap:24px; justify-content:space-between; margin-top:36px; }
+.signature-block { flex:1; text-align:center; }
+.signature-line { border-top:2px solid #333; width:80%; margin:26px auto 6px; height:1px; }
+.signature-label { font-size:12px; color:#555; }
+
+body.standalone {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+#installButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #2C3E50, #34495E);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#installButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+@media (display-mode: standalone) {
+  .header {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .main-content {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- Mobile improvements (ajouter à la fin de styles.css) ---------- */
+
+/* mobile hamburger */
+.mobile-menu{
+  display:none; /* visible seulement sur petit écran */
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* overlay menu (full screen) */
+.mobile-nav-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  z-index: 1500;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 70px; /* below header */
+}
+
+/* slide panel */
+.mobile-nav-panel{
+  width: 320px;
+  max-width: 92%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  padding: 14px;
+  animation: slideDown 220ms ease;
+}
+
+/* nav items inside panel */
+.mobile-nav-panel .nav-tab{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  width:100%;
+  padding:12px 10px;
+  border-radius:8px;
+  background:transparent;
+  border:none;
+  text-align:left;
+  font-weight:600;
+  color:var(--text-primary);
+}
+
+.mobile-nav-panel .nav-tab + .nav-tab{
+  margin-top:6px;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-8px); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
+}
+
+/* bottom nav */
+.bottom-nav{
+  display:none; /* only show on small screens */
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  border-radius: 28px;
+  padding: 6px 8px;
+  z-index: 1400;
+  gap:6px;
+  display:flex;
+  align-items:center;
+}
+
+/* bottom nav buttons */
+.bottom-nav-btn{
+  background: transparent;
+  border: none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  min-width:54px;
+  color:var(--text-secondary);
+  font-size:12px;
+}
+.bottom-nav-btn.active{
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color:white;
+  box-shadow: 0 6px 18px rgba(99,102,241,0.18);
+}
+
+/* Tweak cards, fonts, grids for small screens */
+@media (max-width: 768px) {
+  .header-content{ padding: 8px; gap:8px; }
+  .logo-text{ display:none; } /* conserve logo icon, hide long text */
+  .mobile-menu{ display:flex; }
+  .header-nav{ display:none !important; } /* hide desktop nav */
+
+  .main-content{ padding:12px; max-width: 100%; }
+  .dashboard-grid{ gap:10px; }
+  .card{ padding:12px; border-radius: 10px; }
+  .card-header{ margin-bottom:10px; }
+  .hero-title{ font-size:18px; }
+  .hero-subtitle{ font-size:13px; }
+
+  .members-grid{ grid-template-columns: 1fr !important; }
+  .member-card{ padding:10px; }
+
+  .payment-item, .payment-card { padding:10px; }
+
+  /* progress, charts */
+  .chart-content{ height:200px; }
+
+  /* bottom nav visible on small screens */
+  .bottom-nav{ display:flex; }
+
+  /* modal full width tweak already present in your file, keep it */
+}
+
+/* extra small phones */
+@media (max-width: 420px) {
+  .mobile-nav-panel{ padding:10px; }
+  .mobile-menu-icon{ font-size:20px; }
+  .bottom-nav{ padding:4px; border-radius:20px; }
+  .bottom-nav-btn span{ display:none; } /* show icons only */
+  .logo { gap:8px; }
+  .user-name { display:none; }
 }
