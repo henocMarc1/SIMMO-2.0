@@ -3177,3 +3177,161 @@ document.addEventListener('DOMContentLoaded', () => {
   // document.addEventListener('app:tabChange', closeMobileMenu);
 
 })();
+
+// Navigation mobile - À ajouter dans votre classe PaymentManager
+initMobileNavigation() {
+    // Créer la navigation mobile si elle n'existe pas
+    if (!document.querySelector('.mobile-bottom-nav')) {
+        const mobileNav = document.createElement('div');
+        mobileNav.className = 'mobile-bottom-nav';
+        mobileNav.innerHTML = `
+            <a href="#" class="mobile-nav-item active" data-tab="dashboard">
+                <i class="fas fa-chart-bar"></i>
+                <span>Tableau de bord</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-tab="members">
+                <i class="fas fa-users"></i>
+                <span>Membres</span>
+            </a>
+            <button class="mobile-fab" id="mobileFab">
+                <i class="fas fa-plus"></i>
+            </button>
+            <a href="#" class="mobile-nav-item" data-tab="lots">
+                <i class="fas fa-home"></i>
+                <span>Lots</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-tab="statistics">
+                <i class="fas fa-chart-line"></i>
+                <span>Statistiques</span>
+            </a>
+        `;
+        document.body.appendChild(mobileNav);
+    }
+
+    // Event listeners pour la navigation mobile
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tab = item.dataset.tab;
+            if (tab) {
+                this.showTab(tab);
+                // Mettre à jour l'état actif
+                document.querySelectorAll('.mobile-nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+            }
+        });
+    });
+
+    // Event listener pour le bouton FAB
+    const mobileFab = document.getElementById('mobileFab');
+    if (mobileFab) {
+        mobileFab.addEventListener('click', () => {
+            // Afficher le modal d'ajout selon l'onglet actif
+            const activeTab = this.currentTab;
+            switch (activeTab) {
+                case 'members':
+                    document.getElementById('addMemberModal').style.display = 'flex';
+                    break;
+                case 'lots':
+                    document.getElementById('addLotModal').style.display = 'flex';
+                    break;
+                case 'payments':
+                    document.getElementById('addPaymentModal').style.display = 'flex';
+                    break;
+                default:
+                    // Action par défaut - afficher un menu d'actions
+                    this.showFabMenu();
+            }
+        });
+    }
+
+    // Menu hamburger
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            this.toggleMobileMenu();
+        });
+    }
+}
+
+showFabMenu() {
+    const fabMenu = document.createElement('div');
+    fabMenu.className = 'fab-menu-overlay';
+    fabMenu.innerHTML = `
+        <div class="fab-menu">
+            <div class="fab-menu-item" data-action="add-member">
+                <i class="fas fa-user-plus"></i>
+                <span>Ajouter Membre</span>
+            </div>
+            <div class="fab-menu-item" data-action="add-lot">
+                <i class="fas fa-home"></i>
+                <span>Ajouter Lot</span>
+            </div>
+            <div class="fab-menu-item" data-action="add-payment">
+                <i class="fas fa-credit-card"></i>
+                <span>Ajouter Paiement</span>
+            </div>
+            <div class="fab-menu-close">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(fabMenu);
+    
+    // Animation d'apparition
+    setTimeout(() => fabMenu.classList.add('active'), 10);
+    
+    // Event listeners
+    fabMenu.addEventListener('click', (e) => {
+        if (e.target.closest('.fab-menu-close') || e.target === fabMenu) {
+            this.closeFabMenu(fabMenu);
+        } else if (e.target.closest('.fab-menu-item')) {
+            const action = e.target.closest('.fab-menu-item').dataset.action;
+            this.handleFabAction(action);
+            this.closeFabMenu(fabMenu);
+        }
+    });
+}
+
+closeFabMenu(fabMenu) {
+    fabMenu.classList.remove('active');
+    setTimeout(() => document.body.removeChild(fabMenu), 300);
+}
+
+handleFabAction(action) {
+    switch (action) {
+        case 'add-member':
+            document.getElementById('addMemberModal').style.display = 'flex';
+            break;
+        case 'add-lot':
+            document.getElementById('addLotModal').style.display = 'flex';
+            break;
+        case 'add-payment':
+            document.getElementById('addPaymentModal').style.display = 'flex';
+            break;
+    }
+}
+
+toggleMobileMenu() {
+    // Logique pour le menu hamburger
+    // Vous pouvez implémenter un drawer ou menu latéral ici
+    console.log('Toggle mobile menu');
+}
+
+// Modifier votre méthode init() pour inclure l'initialisation mobile
+init() {
+    // ... votre code existant ...
+    
+    // Ajouter l'initialisation mobile
+    if (window.innerWidth <= 768) {
+        this.initMobileNavigation();
+    }
+    
+    // Listener pour le redimensionnement
+    window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) {
+            this.initMobileNavigation();
+        }
+    });
+}
