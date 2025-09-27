@@ -5810,3 +5810,82 @@ body {
     border-radius: 0 0 16px 16px !important;
 }
 
+
+/* Styles pour le menu FAB */
+@media (max-width: 768px) {
+    .fab-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .fab-menu-overlay.active {
+        opacity: 1;
+    }
+
+    .fab-menu {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+        max-width: 280px;
+        width: 90%;
+    }
+
+    .fab-menu-overlay.active .fab-menu {
+        transform: scale(1);
+    }
+
+    .fab-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-bottom: 8px;
+    }
+
+    .fab-menu-item:hover {
+        background: #f8f9fa;
+    }
+
+    .fab-menu-item i {
+        width: 24px;
+        color: #6366F1;
+        font-size: 16px;
+    }
+
+    .fab-menu-item span {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .fab-menu-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #6c757d;
+    }
+}
