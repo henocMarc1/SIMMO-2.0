@@ -1,0 +1,143 @@
+/* styles.mobile.css
+   Add this AFTER your existing styles.css link (or merge at end of file).
+   Purpose: make the app feel like a lovely native mobile app on phones.
+   See also: your existing mobile rules and mobile menu (styles.css + script.js). 
+*/
+
+:root{
+  --app-bg: #F6F7FB;
+  --surface: #FFFFFF;
+  --muted: #9AA6B2;
+  --primary-grad: linear-gradient(135deg,#6366F1,#8B5CF6);
+  --action: #6366F1;
+  --touch-size: 56px; /* comfortable touch target */
+}
+
+/* Mobile-first enhancements */
+html,body{height:100%;}
+
+/* Make container narrower and centered on phones so it looks like an app card */
+@media (max-width: 900px){
+  .app-container{
+    padding:0;
+    background: linear-gradient(180deg, #F6F7FB 0%, #F8FAFF 100%);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .main-content{
+    width:100%;
+    max-width:420px; /* phone app width */
+    margin: 0 auto 80px auto; /* room for bottom nav / fab */
+    padding: 14px;
+    box-sizing:border-box;
+  }
+
+  .header{
+    width:100%;
+    max-width:420px;
+    border-bottom-left-radius:14px;
+    border-bottom-right-radius:14px;
+    padding:10px 12px;
+    position:fixed;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1200;
+  }
+
+  .header-content{ max-width:100%; padding:0; }
+
+  .logo{ display:flex; align-items:center; gap:10px; }
+  .logo img{ height:36px; width:36px; }
+
+  .header-right{ display:flex; align-items:center; gap:8px; }
+  .user-name{ display:none; }
+
+  /* Nav becomes hidden (we use mobile slide panel) */
+  .header-nav{ display:none !important; }
+
+  /* Cards become full width and taller, mimic native app cards */
+  .card{ border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 8px 30px rgba(20,20,60,0.06); }
+
+  .hero-title{ font-size:18px; }
+  .hero-subtitle{ font-size:13px; }
+
+  .hero-stats{ display:flex; gap:10px; flex-wrap:nowrap; overflow:auto; padding-bottom:6px; }
+  .hero-stat-card{ min-width:140px; flex:0 0 auto; }
+
+  /* touch targets */
+  .btn{ min-height:var(--touch-size); padding: 14px 18px; border-radius:12px; font-size:15px; }
+  .btn .fa, .btn i{ margin-right:8px; }
+
+  /* List items become tappable rows */
+  .payment-card, .payment-item, .member-card{ padding:12px 14px; display:flex; align-items:center; gap:12px; }
+  .payment-card .payment-actions{ margin-left:auto; }
+
+  /* avatars bigger */
+  .payment-avatar, .member-avatar{ width:48px; height:48px; font-size:18px; }
+
+  /* increase table readability on mobile */
+  .stats-table th, .stats-table td{ padding:10px 8px; font-size:13px; }
+
+  /* Modal full-screen mobile style */
+  .modal-container.large{ width:100%; max-width:420px; height:calc(100vh - 80px); border-radius:14px; overflow:auto; }
+  .modal-overlay{ align-items:flex-start; padding-top:80px; }
+  .modal-close{ font-size:22px; }
+
+  /* Make month selector and small inputs full width */
+  .month-selector{ display:flex; gap:8px; align-items:center; }
+  .month-nav{ width:38px; height:38px; }
+
+  /* Friendly bottom navigation (like native app) */
+  .bottom-nav{ display:flex; }
+  .bottom-nav-btn{ min-width:62px; min-height:62px; padding:8px 10px; border-radius:14px; font-size:12px; }
+  .bottom-nav-btn i{ font-size:18px; }
+
+  /* Floating Action Button */
+  .fab{
+    position: fixed;
+    right: 18px;
+    bottom: 78px; /* above bottom-nav */
+    width: var(--touch-size);
+    height: var(--touch-size);
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: var(--primary-grad);
+    color:white;
+    box-shadow: 0 10px 28px rgba(99,102,241,0.22);
+    border: none;
+    z-index:1500;
+    font-size:28px;
+  }
+
+  /* App-like small header icons */
+  .mobile-menu{ width:46px; height:46px; display:flex; align-items:center; justify-content:center; }
+
+  /* Compact footer space to avoid overlapping content */
+  body{ padding-bottom:96px; }
+}
+
+/* Very small phones adjustments */
+@media (max-width:380px){
+  .main-content{ padding:12px; }
+  .fab{ right:14px; bottom:72px; width:52px; height:52px; font-size:26px; }
+  .bottom-nav{ left:50%; transform:translateX(-50%); bottom:12px; }
+}
+
+/* Accessibility: increase focus ring and hit area */
+.nav-tab:focus, .btn:focus, .bottom-nav-btn:focus, .mobile-menu:focus{ outline: none; box-shadow: 0 0 0 4px rgba(99,102,241,0.12); }
+
+/* Optional: hide big decorative gradients that may look heavy on small devices */
+@media (max-width:900px){
+  .card::before{ height: 2px; }
+}
+
+/* Small tweaks to make modals, toasts and toasts copyable on mobile */
+.toast-container{ bottom: 90px; left: 50%; transform: translateX(-50%); }
+
+/* End of styles.mobile.css */
