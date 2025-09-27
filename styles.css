@@ -6063,3 +6063,21 @@ body.standalone {
   .logo { gap:8px; }
   .user-name { display:none; }
 }
+
+
+
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;   /* hauteur fixe pour éviter les débordements */
+  max-width: 100%;
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+
