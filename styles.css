@@ -6323,3 +6323,19 @@ body.standalone {
 /* boutons utilitaires */
 .action-btn.primary { background: linear-gradient(135deg,#6366F1,#8B5CF6); color:#fff; border:none; }
 .action-btn.secondary { background: rgba(0,0,0,0.06); color:#333; border:none; }
+
+
+/* preview & styles pour photo dans le modal (injection non intrusive) */
+.photo-field { margin-top:12px; }
+.photo-field input[type="file"] { display:block; width:100%; }
+.photo-preview { display:none; width:100%; height:160px; object-fit:cover; border-radius:8px; border:1px solid #eef0f3; margin-top:8px; }
+.photo-preview.visible { display:block; }
+
+/* styles pour la carte (au besoin, adaptés pour s'intégrer à ton thème) */
+.lot-card { border-radius:12px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.08); background:#fff; transition:transform .25s ease; }
+.lot-card .lot-media { position:relative; height:160px; overflow:hidden; }
+.lot-card .lot-bg-div { position:absolute; inset:0; background-size:cover; background-position:center; transform:scale(1.05); filter: blur(8px) brightness(0.9); }
+.lot-card .lot-gradient { position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,0.85) 18%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0)); pointer-events:none; }
+.lot-card .lot-info { position:absolute; left:16px; right:16px; bottom:12px; z-index:2; color:#fff; text-shadow: 0 4px 12px rgba(0,0,0,0.45); }
+.lot-card .lot-info h3 { margin:0; font-size:18px; font-weight:700; }
+.lot-card .lot-body { padding:12px 14px 16px; background:linear-gradient(180deg,#fff,#fff); color:#333; }
