@@ -570,92 +570,6 @@ window.addEventListener('load', () => {
 });
 </script>
 
-
-
-
-<script>
-(function(){
-  const input = document.getElementById('lotPhotosInput');
-  const card = document.getElementById('lotCard');
-  const img = document.getElementById('lotCardImg');
-
-  // champs d'info (si tu en as dans le formulaire, donne-leur ces ids pour synchro automatique)
-  const map = {
-    title: document.getElementById('lotCardTitle'),
-    address: document.getElementById('lotCardAddress'),
-    beds: document.getElementById('lotCardBeds'),
-    baths: document.getElementById('lotCardBaths'),
-    sqft: document.getElementById('lotCardSqft'),
-    price: document.getElementById('lotCardPrice'),
-  };
-
-  // essaye de récupérer des champs du formulaire s'ils existent (ids standards)
-  function syncFromForm() {
-    const may = (id) => document.getElementById(id);
-    const t = may('lotTitle')?.value;
-    const a = may('lotAddress')?.value;
-    const b = may('lotBeds')?.value;
-    const ba = may('lotBaths')?.value;
-    const s = may('lotSqft')?.value;
-    const p = may('lotPrice')?.value;
-
-    if (t) map.title.textContent = t;
-    if (a) map.address.textContent = a;
-    if (b) map.beds.textContent = 'Beds: ' + b;
-    if (ba) map.baths.textContent = 'Baths: ' + ba;
-    if (s) map.sqft.textContent = 'Sqft: ' + s;
-    if (p) map.price.textContent = p;
-  }
-
-  // si on change d'autres inputs, mettre à jour en live (optionnel)
-  ['lotTitle','lotAddress','lotBeds','lotBaths','lotSqft','lotPrice'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', syncFromForm);
-  });
-
-  if (!input || !card || !img) return;
-
-  input.addEventListener('change', (e) => {
-    const file = input.files && input.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      alert('Choisis une image (jpg/png).');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      img.src = ev.target.result;
-      // montrer la carte
-      card.classList.remove('hidden');
-      card.setAttribute('aria-hidden','false');
-
-      // au cas où : synchroniser texte depuis le formulaire
-      syncFromForm();
-
-      // donner un petit effet d'apparition
-      img.style.opacity = '0';
-      img.style.transform = 'scale(1.08)';
-      requestAnimationFrame(()=> {
-        img.style.transition = 'opacity 420ms ease, transform 420ms ease';
-        img.style.opacity = '1';
-        img.style.transform = 'scale(1.06)';
-      });
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // expose helper si besoin ailleurs
-  window.lotCard = {
-    show: () => card.classList.remove('hidden'),
-    hide: () => { card.classList.add('hidden'); card.setAttribute('aria-hidden','true') },
-    setImageDataURL: (dataUrl) => { img.src = dataUrl; card.classList.remove('hidden') }
-  };
-})();
-</script>
-
-
 <script>
 (function(){
   // helpers
@@ -874,6 +788,7 @@ window.addEventListener('load', () => {
   window.getSelectedLotPhotoDataURL = ()=> window._selectedLotPhotoDataURL || null;
 })();
 </script>
+
 
 </body>
 </html>
