@@ -537,5 +537,126 @@ window.addEventListener('load', () => {
 </script>
 
 
+<!-- Photos du lot -->
+<div class="form-group">
+  <label class="form-label" for="lotPhotosInput">Photos du lot</label>
+  <input
+    type="file"
+    id="lotPhotosInput"
+    class="form-input"
+    accept="image/*"
+    multiple
+    aria-describedby="lotPhotosHelp"
+  />
+  <div id="lotPhotosHelp" class="form-help" style="font-size:12px;color:#666;margin-top:6px;">
+    Ajoute plusieurs images (jpeg, png…). Aperçu affiché ci-dessous.
+  </div>
+
+  <!-- Aperçu miniatures -->
+  <div id="lotPhotosPreview" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
+</div>
+
+
+<script>
+/* Photos pour formulaire "Ajouter Lot" */
+(function(){
+  const input = document.getElementById('lotPhotosInput');
+  const preview = document.getElementById('lotPhotosPreview');
+  window.lotPhotos = []; // tableau { name, type, data } (data = dataURL)
+
+  if (!input || !preview) {
+    // si le HTML n'est pas présent, on arrête proprement
+    return;
+  }
+
+  input.addEventListener('change', (e) => {
+    preview.innerHTML = '';
+    window.lotPhotos = [];
+    Array.from(input.files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataURL = ev.target.result;
+        window.lotPhotos.push({ name: file.name, type: file.type, data: dataURL });
+
+        // créer miniature
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '96px';
+        wrapper.style.height = '64px';
+        wrapper.style.overflow = 'hidden';
+        wrapper.style.borderRadius = '8px';
+        wrapper.style.border = '1px solid #e0e0e0';
+        wrapper.style.display = 'inline-flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.justifyContent = 'center';
+        wrapper.title = file.name;
+
+        const img = document.createElement('img');
+        img.src = dataURL;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        wrapper.appendChild(img);
+
+        preview.appendChild(wrapper);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // helper: convert dataURL -> Blob
+  function dataURItoBlob(dataURI) {
+    const binary = atob(dataURI.split(',')[1]);
+    const mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+    return new Blob([array], { type: mime });
+  }
+
+  // Si ton formulaire a un id addLotForm, on l'intercepte pour envoyer les images avec FormData.
+  const form = document.getElementById('addLotForm');
+  if (form) {
+    form.addEventListener('submit', function(ev){
+      // Si le formulaire est déjà géré côté JS, adapte : ici on empêche l'envoi standard
+      ev.preventDefault();
+
+      const fd = new FormData(form);
+
+      // ajouter images (si présentes)
+      window.lotPhotos.forEach((p, i) => {
+        fd.append('photos[]', dataURItoBlob(p.data), p.name);
+      });
+
+      // Exemple d'envoi (adaptable) : si tu as un endpoint -> remplace URL par la tienne
+      const url = form.action || '/api/lots';
+      const method = (form.method || 'POST').toUpperCase();
+
+      fetch(url, { method, body: fd })
+        .then(res => {
+          if (!res.ok) throw new Error('Erreur réseau');
+          return res.json();
+        })
+        .then(data => {
+          console.log('Lot ajouté', data);
+          // tu peux fermer le modal / rafraîchir la liste
+          // ex : document.getElementById('addLotModal').classList.remove('active')
+          // ou recharger la page : location.reload()
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Erreur lors de l\'envoi des photos : ' + err.message);
+        });
+    });
+  } else {
+    // si pas de form id addLotForm, expose helper à utiliser depuis ton code
+    console.warn('addLotForm non trouvé — appelle window.getSelectedLotPhotos() depuis ton code au moment de l\'enregistrement.');
+  }
+
+  // getter pratique
+  window.getSelectedLotPhotos = () => window.lotPhotos.slice();
+})();
+</script>
+
+
 </body>
 </html>
