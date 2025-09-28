@@ -784,5 +784,241 @@ window.addEventListener('load', () => {
 })();
 </script>
 
+<script>
+(function(){
+  // ---------- UTIL ----------
+  function $(s, root=document){ return root.querySelector(s); }
+  function create(tag, attrs={}, children=[]){
+    const el = document.createElement(tag);
+    for(const k in attrs){
+      if(k === 'style') Object.assign(el.style, attrs[k]);
+      else if(k === 'text') el.textContent = attrs[k];
+      else el.setAttribute(k, attrs[k]);
+    }
+    (Array.isArray(children)?children:[children]).forEach(c=>{
+      if(!c) return;
+      if(typeof c === 'string') el.insertAdjacentHTML('beforeend', c);
+      else el.appendChild(c);
+    });
+    return el;
+  }
+
+  // ---------- Injecte input photo si nécessaire et ajoute preview ---------- 
+  function ensurePhotoField(form){
+    if(!form) return null;
+    if(form.dataset.photoInjected === '1') return {
+      fileInput: form.querySelector('#lotPhotoInput'),
+      previewImg: form.querySelector('#lotPhotoPreview'),
+      hidden: form.querySelector('input[name="photoData"]')
+    };
+
+    // crée bloc photo
+    const wrapper = create('div',{ class: 'form-group photo-field', style: '' });
+    const label = create('label',{ class: 'form-label', text: 'Photo du lot' });
+    const fileInput = create('input',{ type: 'file', accept: 'image/*', id: 'lotPhotoInput', class: 'form-input' });
+    const previewImg = create('img',{ id: 'lotPhotoPreview', class: 'photo-preview', style:{ display:'none', width:'100%', height:'160px', objectFit:'cover', borderRadius:'8px', marginTop:'8px' }});
+    const hidden = create('input',{ type: 'hidden', name: 'photoData', id: 'lotPhotoData' });
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(fileInput);
+    wrapper.appendChild(previewImg);
+    wrapper.appendChild(hidden);
+
+    // insère avant le bouton d'actions si possible
+    const actions = form.querySelector('.form-actions') || form.querySelector('.actions') || null;
+    if(actions) actions.parentNode.insertBefore(wrapper, actions);
+    else form.appendChild(wrapper);
+
+    // lecture + preview
+    fileInput.addEventListener('change', (ev)=>{
+      const f = fileInput.files && fileInput.files[0];
+      if(!f){ previewImg.style.display='none'; previewImg.src=''; hidden.value=''; window._selectedLotPhotoDataURL=null; return; }
+      if(!f.type.startsWith('image/')){ alert('Choisis une image (jpg/png).'); fileInput.value=''; return; }
+      const r = new FileReader();
+      r.onload = function(e){
+        previewImg.src = e.target.result;
+        previewImg.style.display = 'block';
+        hidden.value = e.target.result;
+        window._selectedLotPhotoDataURL = e.target.result;
+      };
+      r.readAsDataURL(f);
+    });
+
+    form.dataset.photoInjected = '1';
+    return { fileInput, previewImg, hidden };
+  }
+
+  // ---------- Crée une carte LOT dans #lotsGrid avec image en fond flouté + dégradé ----------
+  function createLotCard(lot){
+    const grid = document.getElementById('lotsGrid');
+    if(!grid) return;
+
+    // wrapper
+    const card = create('div',{ class: 'lot-card', style: 'position:relative; overflow:hidden;' });
+
+    // background image (img element, absolutely positioned, with blur)
+    const img = create('img', { class: 'lot-bg', alt: lot.title || 'lot image', src: lot.img || '', style: {
+      position: 'absolute',
+      inset: '0',
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      transform: 'scale(1.06)',
+      filter: 'blur(8px) brightness(0.9)',
+      zIndex: '0'
+    }});
+
+    // gradient overlay at bottom
+    const overlayGradient = create('div', { class: 'lot-gradient', style: {
+      position: 'absolute',
+      left:'0', right:'0', bottom:'0',
+      height:'60%',
+      background: 'linear-gradient(to top, rgba(0,0,0,0.85) 18%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0) 100%)',
+      zIndex: '1'
+    }});
+
+    // content container (z-index above gradient)
+    const content = create('div',{ class:'lot-card-content', style: { position:'absolute', left:'18px', right:'18px', bottom:'18px', zIndex:'2', color:'#fff', display:'flex', flexDirection:'column', gap:'8px' }});
+
+    const title = create('h3',{ class:'lot-title', text: lot.title || 'The Hills Guest House', style:{ margin:'0', fontSize:'22px', fontWeight:700 }});
+    const address = create('div',{ class:'lot-address', text: lot.address || '', style:{ fontSize:'13px', opacity:0.95 }});
+
+    const meta = create('div',{ class:'lot-meta', style:{ display:'flex', gap:'12px', fontSize:'13px', opacity:0.95 }});
+    meta.innerHTML = `<div>🛏 ${lot.beds||0}</div><div>🛁 ${lot.baths||0}</div><div>📐 ${lot.sqft||''}</div>`;
+
+    // footer: price + original button style if present in page copy that class, else simple button
+    const footer = create('div',{ class:'lot-card-footer', style:{ display:'flex', gap:'12px', alignItems:'center', marginTop:'6px' }});
+    const pricePill = create('div',{ class:'lot-price', text: lot.price || '$--', style:{ background:'rgba(255,255,255,0.12)', padding:'10px 14px', borderRadius:'18px', fontWeight:700 }});
+    // clone a real button if there is a sample in DOM to keep styling consistent
+    let sampleBtn = document.querySelector('.btn.btn-primary') || document.querySelector('.btn-primary') || null;
+    let reserveBtn;
+    if(sampleBtn){
+      reserveBtn = sampleBtn.cloneNode(true);
+      reserveBtn.removeAttribute('id');
+      reserveBtn.textContent = 'Reserve Apartment';
+      reserveBtn.style.marginLeft = 'auto';
+    } else {
+      reserveBtn = create('button', { class:'reserve-btn', text: 'Reserve Apartment' , style:{ marginLeft:'auto', padding:'10px 18px', borderRadius:'999px', border:'none', cursor:'pointer' }});
+    }
+    // sample click behavior - keep it safe
+    reserveBtn.addEventListener('click', ()=> alert('Réserver : '+(lot.title||'lot')));
+    footer.appendChild(pricePill);
+    footer.appendChild(reserveBtn);
+
+    content.appendChild(title);
+    content.appendChild(address);
+    content.appendChild(meta);
+    content.appendChild(footer);
+
+    card.appendChild(img);
+    card.appendChild(overlayGradient);
+    card.appendChild(content);
+
+    // insert card at top of grid
+    grid.insertAdjacentElement('afterbegin', card);
+
+    // small reveal animation
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(8px)';
+    requestAnimationFrame(()=> {
+      card.style.transition = 'opacity 340ms ease, transform 340ms ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    });
+  }
+
+  // ---------- Hook modal form submit: read file, create card, then let original submit continue ----------
+  function attachToForm(form){
+    if(!form) return;
+    if(form.dataset._lotHook === '1') return;
+    const { fileInput, previewImg, hidden } = ensurePhotoField(form);
+
+    form.addEventListener('submit', function(ev){
+      // if we are programmatic-submitting, let it proceed
+      if(form.dataset._submitting === '1'){ delete form.dataset._submitting; return; }
+
+      // gather basic fields (try to be non-intrusive - read common ids)
+      const title = (form.querySelector('#lotTitle') && form.querySelector('#lotTitle').value) || form.querySelector('[name="title"]')?.value || form.querySelector('input[placeholder*="Titre"]')?.value || 'Untitled';
+      const address = (form.querySelector('#lotAddress') && form.querySelector('#lotAddress').value) || form.querySelector('[name="address"]')?.value || '';
+      const beds = (form.querySelector('#lotBeds') && form.querySelector('#lotBeds').value) || form.querySelector('[name="beds"]')?.value || '0';
+      const baths = (form.querySelector('#lotBaths') && form.querySelector('#lotBaths').value) || form.querySelector('[name="baths"]')?.value || '0';
+      const sqft = (form.querySelector('#lotSqft') && form.querySelector('#lotSqft').value) || form.querySelector('[name="sqft"]')?.value || '';
+      const price = (form.querySelector('#lotPrice') && form.querySelector('#lotPrice').value) || form.querySelector('[name="price"]')?.value || '';
+
+      const file = fileInput && fileInput.files && fileInput.files[0];
+      if(!file){
+        // pas d'image : on crée tout de même la carte avec placeholder, but allow normal submit to continue
+        createLotCard({ title, address, beds, baths, sqft, price, img: null });
+        return; // allow default submit to continue
+      }
+
+      // il y a un fichier -> on empêche l'envoi, on le lit, on ajoute la carte, puis on soumet
+      ev.preventDefault();
+
+      const reader = new FileReader();
+      reader.onload = function(e){
+        const dataUrl = e.target.result;
+        // remplir hidden pour que backend reçoive photoData si tu l'utilises
+        if(hidden) hidden.value = dataUrl;
+        window._selectedLotPhotoDataURL = dataUrl;
+
+        // create card immediately (affichage client)
+        createLotCard({ title, address, beds, baths, sqft, price, img: dataUrl });
+
+        // let the original submit continue: we call form.submit(), but set a flag to allow one pass
+        form.dataset._submitting = '1';
+        // slight delay for UI feel & to ensure hidden is set
+        setTimeout(()=> {
+          try{ form.submit(); } catch(err){
+            // fallback: dispatch a submit event (some apps use JS handler)
+            try{ form.dispatchEvent(new Event('submit', {bubbles:true, cancelable: true})); }catch(e){}
+          }
+        }, 120);
+      };
+      reader.onerror = function(err){
+        console.error('FileReader error', err);
+        alert('Impossible de lire l\'image. Essaie une autre image plus petite.');
+        // allow form to submit without image
+        return;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    form.dataset._lotHook = '1';
+  }
+
+  // ---------- Observe modalContent (ton projet injecte modal HTML ici) ----------
+  const modalContent = document.getElementById('modalContent');
+  if(modalContent){
+    const mo = new MutationObserver(muts=>{
+      for(const m of muts){
+        for(const node of m.addedNodes){
+          if(!(node instanceof HTMLElement)) continue;
+          // si un form apparaîit dans le modalContent, on attache
+          const f = node.querySelector && (node.querySelector('form') || node.closest('form')) || node.tagName === 'FORM' && node;
+          if(f) attachToForm(f);
+          // sinon cherche un form plus bas
+          const nestedForm = node.querySelector && node.querySelector('form');
+          if(nestedForm) attachToForm(nestedForm);
+        }
+      }
+    });
+    mo.observe(modalContent, { childList:true, subtree:true });
+    // try immediate attach if form already present
+    const existingForm = modalContent.querySelector('form');
+    if(existingForm) attachToForm(existingForm);
+  } else {
+    // fallback: attach on any form with id addLotForm
+    document.addEventListener('DOMContentLoaded', ()=> {
+      const f = document.getElementById('addLotForm') || document.querySelector('form.add-lot-form');
+      if(f) attachToForm(f);
+    });
+  }
+
+  // expose helper to get last selected image dataURL
+  window.getSelectedLotPhotoDataURL = ()=> window._selectedLotPhotoDataURL || null;
+})();
+</script>
+
 </body>
 </html>
