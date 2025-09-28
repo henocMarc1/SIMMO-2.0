@@ -6135,3 +6135,8 @@ body.standalone {
   .lot-card-cover .cover-title { left: 12px; bottom: 12px; font-size:16px; }
 }
 
+
+
+/* miniatures photos lot */
+#lotPhotosPreview div { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+#lotPhotosPreview img { display:block; }
