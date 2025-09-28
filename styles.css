@@ -6253,3 +6253,22 @@ body.standalone {
   font-weight: 600;
   box-shadow: 0 6px 18px rgba(0,0,0,0.18);
 }
+
+/* ==== preview photo dans modal ajouter lot ==== */
+.modal .photo-field {
+  margin-top: 12px;
+}
+.modal .photo-field input[type="file"] {
+  display: block;
+  width: 100%;
+}
+.modal .photo-preview {
+  display: none;
+  margin-top: 10px;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #efeff3;
+}
+.modal .photo-preview.visible { display: block; }
