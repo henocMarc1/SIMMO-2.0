@@ -250,23 +250,37 @@
                         <div class="lot-detail-value" id="lotDetailLocation">-</div>
                     </div>
                     
-                    <!-- Photos du lot -->
+                    <<!-- === Upload photo + aperçu "carte" === -->
 <div class="form-group">
-  <label class="form-label" for="lotPhotosInput">Photos du lot</label>
-  <input
-    type="file"
-    id="lotPhotosInput"
-    class="form-input"
-    accept="image/*"
-    multiple
-    aria-describedby="lotPhotosHelp"
-  />
-  <div id="lotPhotosHelp" class="form-help" style="font-size:12px;color:#666;margin-top:6px;">
-    Ajoute plusieurs images (jpeg, png…). Aperçu affiché ci-dessous.
-  </div>
+  <label for="lotPhotosInput" class="form-label">Photo du lot</label>
+  <input type="file" id="lotPhotosInput" accept="image/*" class="form-input" />
 
-  <!-- Aperçu miniatures -->
-  <div id="lotPhotosPreview" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
+  <!-- Carte d'aperçu (sera affichée après sélection) -->
+  <div id="lotCard" class="lot-card hidden" aria-hidden="true">
+    <img id="lotCardImg" alt="Preview lot image" />
+    <div class="lot-card-gradient"></div>
+
+    <div class="lot-card-content">
+      <div class="lot-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+
+      <h2 id="lotCardTitle" class="lot-title">The Hills Guest House</h2>
+      <div id="lotCardAddress" class="lot-address">58 Hullbrook Road, Billesley, B13 OLA</div>
+
+      <div class="lot-meta">
+        <span id="lotCardBeds">Beds: 4</span>
+        <span id="lotCardBaths">Baths: 2</span>
+        <span id="lotCardSqft">Sqft: 1150</span>
+      </div>
+
+      <div class="lot-card-footer">
+        <div id="lotCardPrice" class="lot-price">$620</div>
+        <!-- conserve le même type/classes de bouton que dans ton projet -->
+        <button type="button" class="btn btn-primary">Reserve Apartment</button>
+      </div>
+    </div>
+  </div>
 </div>
                     
                     <div class="lot-detail-item">
@@ -559,104 +573,85 @@ window.addEventListener('load', () => {
 
 
 
-
 <script>
-/* Photos pour formulaire "Ajouter Lot" */
 (function(){
   const input = document.getElementById('lotPhotosInput');
-  const preview = document.getElementById('lotPhotosPreview');
-  window.lotPhotos = []; // tableau { name, type, data } (data = dataURL)
+  const card = document.getElementById('lotCard');
+  const img = document.getElementById('lotCardImg');
 
-  if (!input || !preview) {
-    // si le HTML n'est pas présent, on arrête proprement
-    return;
+  // champs d'info (si tu en as dans le formulaire, donne-leur ces ids pour synchro automatique)
+  const map = {
+    title: document.getElementById('lotCardTitle'),
+    address: document.getElementById('lotCardAddress'),
+    beds: document.getElementById('lotCardBeds'),
+    baths: document.getElementById('lotCardBaths'),
+    sqft: document.getElementById('lotCardSqft'),
+    price: document.getElementById('lotCardPrice'),
+  };
+
+  // essaye de récupérer des champs du formulaire s'ils existent (ids standards)
+  function syncFromForm() {
+    const may = (id) => document.getElementById(id);
+    const t = may('lotTitle')?.value;
+    const a = may('lotAddress')?.value;
+    const b = may('lotBeds')?.value;
+    const ba = may('lotBaths')?.value;
+    const s = may('lotSqft')?.value;
+    const p = may('lotPrice')?.value;
+
+    if (t) map.title.textContent = t;
+    if (a) map.address.textContent = a;
+    if (b) map.beds.textContent = 'Beds: ' + b;
+    if (ba) map.baths.textContent = 'Baths: ' + ba;
+    if (s) map.sqft.textContent = 'Sqft: ' + s;
+    if (p) map.price.textContent = p;
   }
 
-  input.addEventListener('change', (e) => {
-    preview.innerHTML = '';
-    window.lotPhotos = [];
-    Array.from(input.files).forEach(file => {
-      if (!file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const dataURL = ev.target.result;
-        window.lotPhotos.push({ name: file.name, type: file.type, data: dataURL });
-
-        // créer miniature
-        const wrapper = document.createElement('div');
-        wrapper.style.width = '96px';
-        wrapper.style.height = '64px';
-        wrapper.style.overflow = 'hidden';
-        wrapper.style.borderRadius = '8px';
-        wrapper.style.border = '1px solid #e0e0e0';
-        wrapper.style.display = 'inline-flex';
-        wrapper.style.alignItems = 'center';
-        wrapper.style.justifyContent = 'center';
-        wrapper.title = file.name;
-
-        const img = document.createElement('img');
-        img.src = dataURL;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        wrapper.appendChild(img);
-
-        preview.appendChild(wrapper);
-      };
-      reader.readAsDataURL(file);
-    });
+  // si on change d'autres inputs, mettre à jour en live (optionnel)
+  ['lotTitle','lotAddress','lotBeds','lotBaths','lotSqft','lotPrice'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', syncFromForm);
   });
 
-  // helper: convert dataURL -> Blob
-  function dataURItoBlob(dataURI) {
-    const binary = atob(dataURI.split(',')[1]);
-    const mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    const array = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
-    return new Blob([array], { type: mime });
-  }
+  if (!input || !card || !img) return;
 
-  // Si ton formulaire a un id addLotForm, on l'intercepte pour envoyer les images avec FormData.
-  const form = document.getElementById('addLotForm');
-  if (form) {
-    form.addEventListener('submit', function(ev){
-      // Si le formulaire est déjà géré côté JS, adapte : ici on empêche l'envoi standard
-      ev.preventDefault();
+  input.addEventListener('change', (e) => {
+    const file = input.files && input.files[0];
+    if (!file) return;
 
-      const fd = new FormData(form);
+    if (!file.type.startsWith('image/')) {
+      alert('Choisis une image (jpg/png).');
+      return;
+    }
 
-      // ajouter images (si présentes)
-      window.lotPhotos.forEach((p, i) => {
-        fd.append('photos[]', dataURItoBlob(p.data), p.name);
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      img.src = ev.target.result;
+      // montrer la carte
+      card.classList.remove('hidden');
+      card.setAttribute('aria-hidden','false');
+
+      // au cas où : synchroniser texte depuis le formulaire
+      syncFromForm();
+
+      // donner un petit effet d'apparition
+      img.style.opacity = '0';
+      img.style.transform = 'scale(1.08)';
+      requestAnimationFrame(()=> {
+        img.style.transition = 'opacity 420ms ease, transform 420ms ease';
+        img.style.opacity = '1';
+        img.style.transform = 'scale(1.06)';
       });
+    };
+    reader.readAsDataURL(file);
+  });
 
-      // Exemple d'envoi (adaptable) : si tu as un endpoint -> remplace URL par la tienne
-      const url = form.action || '/api/lots';
-      const method = (form.method || 'POST').toUpperCase();
-
-      fetch(url, { method, body: fd })
-        .then(res => {
-          if (!res.ok) throw new Error('Erreur réseau');
-          return res.json();
-        })
-        .then(data => {
-          console.log('Lot ajouté', data);
-          // tu peux fermer le modal / rafraîchir la liste
-          // ex : document.getElementById('addLotModal').classList.remove('active')
-          // ou recharger la page : location.reload()
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Erreur lors de l\'envoi des photos : ' + err.message);
-        });
-    });
-  } else {
-    // si pas de form id addLotForm, expose helper à utiliser depuis ton code
-    console.warn('addLotForm non trouvé — appelle window.getSelectedLotPhotos() depuis ton code au moment de l\'enregistrement.');
-  }
-
-  // getter pratique
-  window.getSelectedLotPhotos = () => window.lotPhotos.slice();
+  // expose helper si besoin ailleurs
+  window.lotCard = {
+    show: () => card.classList.remove('hidden'),
+    hide: () => { card.classList.add('hidden'); card.setAttribute('aria-hidden','true') },
+    setImageDataURL: (dataUrl) => { img.src = dataUrl; card.classList.remove('hidden') }
+  };
 })();
 </script>
 
