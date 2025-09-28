@@ -6080,3 +6080,58 @@ body.standalone {
   display: block;
 }
 
+/* ---------- Cover image + overlay pour les lot-cards existantes ---------- */
+/* zone cover injectée automatiquement par JS (sans toucher ton HTML) */
+.lot-card-cover {
+  width: 100%;
+  height: 220px;                 /* ajuste si nécessaire */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-top-left-radius: var(--card-radius-xl);
+  border-top-right-radius: var(--card-radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* couche sombre + blur douce (garde le texte lisible) */
+.lot-card-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+/* si tu veux un titre directement sur la cover (optionnel) */
+.lot-card-cover .cover-title {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  z-index: 3;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow: 0 8px 22px rgba(0,0,0,0.55);
+}
+
+/* remonte légèrement le corps de la card sur la cover (effet overlapping) */
+.lot-card.has-cover .lot-card-header {
+  padding-top: 12px; /* réduit pour coller mieux à la cover */
+}
+.lot-card.has-cover .lot-card-body {
+  margin-top: -48px; /* crée l'effet superposé */
+  z-index: 4;
+  position: relative;
+}
+
+/* version mobile */
+@media (max-width: 768px) {
+  .lot-card-cover { height: 150px; }
+  .lot-card.has-cover .lot-card-body { margin-top: -36px; }
+  .lot-card-cover .cover-title { left: 12px; bottom: 12px; font-size:16px; }
+}
+
