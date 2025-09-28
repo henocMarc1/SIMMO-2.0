@@ -249,6 +249,26 @@
                         <div class="lot-detail-label">Localisation</div>
                         <div class="lot-detail-value" id="lotDetailLocation">-</div>
                     </div>
+                    
+                    <!-- Photos du lot -->
+<div class="form-group">
+  <label class="form-label" for="lotPhotosInput">Photos du lot</label>
+  <input
+    type="file"
+    id="lotPhotosInput"
+    class="form-input"
+    accept="image/*"
+    multiple
+    aria-describedby="lotPhotosHelp"
+  />
+  <div id="lotPhotosHelp" class="form-help" style="font-size:12px;color:#666;margin-top:6px;">
+    Ajoute plusieurs images (jpeg, png…). Aperçu affiché ci-dessous.
+  </div>
+
+  <!-- Aperçu miniatures -->
+  <div id="lotPhotosPreview" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
+</div>
+                    
                     <div class="lot-detail-item">
                         <div class="lot-detail-label">Statut</div>
                         <div class="lot-detail-value" id="lotDetailStatus">-</div>
@@ -537,24 +557,7 @@ window.addEventListener('load', () => {
 </script>
 
 
-<!-- Photos du lot -->
-<div class="form-group">
-  <label class="form-label" for="lotPhotosInput">Photos du lot</label>
-  <input
-    type="file"
-    id="lotPhotosInput"
-    class="form-input"
-    accept="image/*"
-    multiple
-    aria-describedby="lotPhotosHelp"
-  />
-  <div id="lotPhotosHelp" class="form-help" style="font-size:12px;color:#666;margin-top:6px;">
-    Ajoute plusieurs images (jpeg, png…). Aperçu affiché ci-dessous.
-  </div>
 
-  <!-- Aperçu miniatures -->
-  <div id="lotPhotosPreview" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
-</div>
 
 
 <script>
