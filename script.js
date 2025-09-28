@@ -3177,3 +3177,160 @@ document.addEventListener('DOMContentLoaded', () => {
   // document.addEventListener('app:tabChange', closeMobileMenu);
 
 })();
+
+
+// script.js
+document.addEventListener('DOMContentLoaded', () => {
+  const addLotBtn = document.getElementById('addLotBtn');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalContent = document.getElementById('modalContent');
+  const modalClose = document.getElementById('modalClose');
+  const lotsGrid = document.getElementById('lotsGrid');
+
+  // Hide modal by default
+  modalOverlay.style.display = 'none';
+
+  function buildAddLotForm() {
+    return `
+      <div class="modal-container large">
+        <div class="modal-header">
+          <h3 class="modal-title">Ajouter un lot</h3>
+          <button class="modal-close" id="internalModalClose">×</button>
+        </div>
+        <div class="modal-content modal-add-lot">
+          <form id="addLotForm" class="form-grid">
+            <div class="form-row">
+              <label>Nom du lot</label>
+              <input type="text" id="lotTitle" name="lotTitle" class="form-input" required />
+            </div>
+            <div class="form-row">
+              <label>Prix (FCFA)</label>
+              <input type="number" id="lotPrice" name="lotPrice" class="form-input" required />
+            </div>
+            <div class="form-row">
+              <label>Localisation</label>
+              <input type="text" id="lotLocation" name="lotLocation" class="form-input" />
+            </div>
+            <div class="form-row">
+              <label>Description</label>
+              <textarea id="lotDescription" name="lotDescription" class="form-input" rows="3"></textarea>
+            </div>
+            <div class="form-row">
+              <label>Photo du lot</label>
+              <input type="file" id="lotPhotoInput" accept="image/*" class="form-input" />
+              <small class="muted">La photo sera affichée en arrière-plan flou avec un dégradé.</small>
+            </div>
+            <div class="form-actions" style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+              <button type="button" id="cancelAddLot" class="btn action-btn secondary">Annuler</button>
+              <button type="submit" class="btn action-btn primary">Créer le lot</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
+  function openModal(html) {
+    modalContent.innerHTML = html;
+    modalOverlay.style.display = 'flex';
+    const internalClose = document.getElementById('internalModalClose');
+    const cancelAddLot = document.getElementById('cancelAddLot');
+    internalClose && internalClose.addEventListener('click', closeModal);
+    cancelAddLot && cancelAddLot.addEventListener('click', closeModal);
+    const addLotForm = document.getElementById('addLotForm');
+    addLotForm && addLotForm.addEventListener('submit', handleAddLotSubmit);
+  }
+
+  function closeModal() {
+    modalContent.innerHTML = '';
+    modalOverlay.style.display = 'none';
+  }
+
+  function handleAddLotSubmit(e) {
+    e.preventDefault();
+    const title = document.getElementById('lotTitle').value.trim() || 'Lot sans nom';
+    const price = document.getElementById('lotPrice').value.trim();
+    const location = document.getElementById('lotLocation').value.trim();
+    const description = document.getElementById('lotDescription').value.trim();
+    const photoInput = document.getElementById('lotPhotoInput');
+
+    if (photoInput && photoInput.files && photoInput.files[0]) {
+      const file = photoInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const dataUrl = evt.target.result;
+        createLotCard({ title, price, location, description, photo: dataUrl });
+      };
+      reader.onerror = function() {
+        createLotCard({ title, price, location, description, photo: null });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      createLotCard({ title, price, location, description, photo: null });
+    }
+
+    closeModal();
+  }
+
+  function createLotCard(lot) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'lot-card';
+
+    wrapper.innerHTML = `
+      <div class="lot-media">
+        <div class="lot-bg" ${lot.photo ? `style="background-image:url('${lot.photo}');"` : ''}></div>
+        <div class="lot-gradient"></div>
+        <div class="lot-media-info">
+          <h3 class="lot-title">${escapeHtml(lot.title)}</h3>
+          <div class="lot-sub">${escapeHtml(lot.location || '')}</div>
+        </div>
+      </div>
+
+      <div class="lot-card-body">
+        <div class="lot-meta">
+          <div class="lot-price">${lot.price ? formatCurrency(lot.price) : '-'}</div>
+          <div class="lot-status">Disponible</div>
+        </div>
+
+        <div class="lot-description">${escapeHtml(lot.description || '')}</div>
+
+        <div class="lot-actions">
+          <button class="lot-action-btn details">Détails</button>
+          <button class="lot-action-btn edit">Éditer</button>
+          <button class="lot-action-btn delete">Supprimer</button>
+        </div>
+      </div>
+    `;
+
+    if (lot.photo) {
+      wrapper.classList.add('has-photo');
+      const bg = wrapper.querySelector('.lot-bg');
+      bg.style.backgroundSize = 'cover';
+      bg.style.backgroundPosition = 'center';
+    }
+
+    wrapper.querySelector('.lot-action-btn.delete').addEventListener('click', () => wrapper.remove());
+
+    lotsGrid.prepend(wrapper);
+  }
+
+  function escapeHtml(s) {
+    if (!s) return '';
+    return s.replace(/[&<>"']/g, function (m) {
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+    });
+  }
+
+  function formatCurrency(v) {
+    try {
+      const n = Number(v);
+      return n.toLocaleString('fr-FR') + ' FCFA';
+    } catch (err) {
+      return v + ' FCFA';
+    }
+  }
+
+  addLotBtn && addLotBtn.addEventListener('click', () => openModal(buildAddLotForm()));
+  modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+  modalClose && modalClose.addEventListener('click', () => { modalOverlay.style.display = 'none'; });
+});
