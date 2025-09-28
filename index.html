@@ -574,6 +574,95 @@ window.addEventListener('load', () => {
 });
 </script>
 
+<script>
+/* Simple helper pour créer une carte lot avec image (dataURL) */
+function createLotCard({title, location, price, beds, baths, sqft, imageDataUrl}) {
+  const wrapper = document.createElement('article');
+  wrapper.className = 'lot-card card';
+
+  // cover (background-image)
+  const cover = document.createElement('div');
+  cover.className = 'lot-card-cover';
+  if (imageDataUrl) cover.style.backgroundImage = `url("${imageDataUrl}")`;
+  else cover.style.backgroundImage = `linear-gradient(135deg,#e9eef7,#f6f7fb)`;
+
+  // titre sur image
+  const coverTitle = document.createElement('div');
+  coverTitle.className = 'lot-cover-title';
+  coverTitle.textContent = title || 'Titre du lot';
+  cover.appendChild(coverTitle);
+
+  // body
+  const body = document.createElement('div');
+  body.className = 'lot-card-body';
+
+  body.innerHTML = `
+    <div class="lot-title-row">
+      <h3 class="lot-title">${title || '-'}</h3>
+      <span class="lot-status">Disponible</span>
+    </div>
+    <p class="lot-location">${location || '-'}</p>
+    <div class="lot-meta" style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+      <div class="lot-meta-inline">
+        <span>🛏 ${beds || 0}</span>
+        <span>🛁 ${baths || 0}</span>
+        <span>📐 ${sqft || '-'}</span>
+      </div>
+      <div class="lot-price">
+        <div class="price-value">${price || '-'}</div>
+        <div class="price-label">Prix</div>
+      </div>
+    </div>
+    <div class="lot-actions" style="margin-top:14px;">
+      <button class="lot-action-btn details">Détails</button>
+      <button class="lot-action-btn edit">Éditer</button>
+    </div>
+  `;
+
+  wrapper.appendChild(cover);
+  wrapper.appendChild(body);
+
+  // append to grid
+  const grid = document.getElementById('lotsGrid');
+  if (grid) grid.prepend(wrapper);
+  else console.warn('#lotsGrid introuvable');
+}
+
+/* Hook sur bouton "Ajouter Lot" (utilise un prompt + file input simple) */
+document.getElementById('addLotBtn')?.addEventListener('click', () => {
+  const title = prompt('Titre du lot ?', 'The Hills Guest House');
+  if (title === null) return;
+
+  // créer un file input temporaire pour choisir une image
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      // créer carte sans image
+      createLotCard({ title });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const dataUrl = ev.target.result;
+      // tu peux aussi récupérer location/price via d'autres prompts si besoin
+      createLotCard({
+        title,
+        location: prompt('Localisation ?', '58 Hullbrook Road'),
+        price: prompt('Prix ?', '620$'),
+        beds: prompt('Nombre de lits ?', '4'),
+        baths: prompt('Salles de bain ?', '2'),
+        sqft: prompt('Surface (sqft) ?', '1150'),
+        imageDataUrl: dataUrl
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+});
+</script>
 
 </body>
 </html>
