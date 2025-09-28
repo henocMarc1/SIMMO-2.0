@@ -6135,8 +6135,121 @@ body.standalone {
   .lot-card-cover .cover-title { left: 12px; bottom: 12px; font-size:16px; }
 }
 
+/* LOT CARD PREVIEW */
+.hidden { display: none !important; }
 
+.lot-card {
+  position: relative;
+  width: 420px;           /* ajuste si besoin */
+  height: 540px;          /* ajuste si besoin */
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  background: #000;
+  margin-top: 12px;
+  color: #fff;
+  font-family: inherit;
+}
 
-/* miniatures photos lot */
-#lotPhotosPreview div { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-#lotPhotosPreview img { display:block; }
+/* image full-bleed floue */
+.lot-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.06);
+  filter: blur(10px) brightness(0.95);
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+/* gradient overlay (dark en bas) */
+.lot-card-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top,
+    rgba(0,0,0,0.85) 18%,
+    rgba(0,0,0,0.55) 38%,
+    rgba(0,0,0,0.25) 60%,
+    rgba(0,0,0,0) 100%);
+  pointer-events: none;
+}
+
+/* contenu (texte, boutons) positionné en bas */
+.lot-card-content {
+  position: absolute;
+  bottom: 18px;
+  left: 20px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* petits points de page */
+.lot-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.lot-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.75);
+  display:inline-block;
+  opacity: 0.85;
+}
+
+/* titres / textes */
+.lot-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.lot-address {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.lot-meta {
+  display:flex;
+  gap: 16px;
+  font-size: 13px;
+  opacity: 0.95;
+  align-items:center;
+}
+
+/* footer: prix + bouton */
+.lot-card-footer {
+  margin-top: 6px;
+  display:flex;
+  align-items:center;
+  gap: 14px;
+}
+.lot-price {
+  background: rgba(255,255,255,0.12);
+  padding: 12px 18px;
+  border-radius: 20px;
+  font-weight: 700;
+  min-width: 90px;
+  text-align:center;
+  font-size:16px;
+}
+
+/* bouton (si tu utilises d'autres classes de boutons, adapte) */
+.btn {
+  border: 0;
+  padding: 12px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.btn-primary {
+  background: #fff;
+  color: #111;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
