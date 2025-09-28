@@ -3178,159 +3178,211 @@ document.addEventListener('DOMContentLoaded', () => {
 
 })();
 
-
-// script.js
-document.addEventListener('DOMContentLoaded', () => {
-  const addLotBtn = document.getElementById('addLotBtn');
-  const modalOverlay = document.getElementById('modalOverlay');
-  const modalContent = document.getElementById('modalContent');
-  const modalClose = document.getElementById('modalClose');
-  const lotsGrid = document.getElementById('lotsGrid');
-
-  // Hide modal by default
-  modalOverlay.style.display = 'none';
-
-  function buildAddLotForm() {
-    return `
-      <div class="modal-container large">
-        <div class="modal-header">
-          <h3 class="modal-title">Ajouter un lot</h3>
-          <button class="modal-close" id="internalModalClose">×</button>
-        </div>
-        <div class="modal-content modal-add-lot">
-          <form id="addLotForm" class="form-grid">
-            <div class="form-row">
-              <label>Nom du lot</label>
-              <input type="text" id="lotTitle" name="lotTitle" class="form-input" required />
-            </div>
-            <div class="form-row">
-              <label>Prix (FCFA)</label>
-              <input type="number" id="lotPrice" name="lotPrice" class="form-input" required />
-            </div>
-            <div class="form-row">
-              <label>Localisation</label>
-              <input type="text" id="lotLocation" name="lotLocation" class="form-input" />
-            </div>
-            <div class="form-row">
-              <label>Description</label>
-              <textarea id="lotDescription" name="lotDescription" class="form-input" rows="3"></textarea>
-            </div>
-            <div class="form-row">
-              <label>Photo du lot</label>
-              <input type="file" id="lotPhotoInput" accept="image/*" class="form-input" />
-              <small class="muted">La photo sera affichée en arrière-plan flou avec un dégradé.</small>
-            </div>
-            <div class="form-actions" style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
-              <button type="button" id="cancelAddLot" class="btn action-btn secondary">Annuler</button>
-              <button type="submit" class="btn action-btn primary">Créer le lot</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    `;
+<script>
+(function(){
+  // ---------- helpers ----------
+  function $(sel, root=document){ return root.querySelector(sel); }
+  function create(tag, attrs={}, children=[]){
+    const el = document.createElement(tag);
+    for(const k in attrs){
+      if(k === 'style' && typeof attrs[k] === 'object') Object.assign(el.style, attrs[k]);
+      else if(k === 'text') el.textContent = attrs[k];
+      else el.setAttribute(k, attrs[k]);
+    }
+    (Array.isArray(children) ? children : [children]).forEach(c => { if(!c) return; if(typeof c === 'string') el.insertAdjacentHTML('beforeend', c); else el.appendChild(c); });
+    return el;
   }
 
-  function openModal(html) {
-    modalContent.innerHTML = html;
-    modalOverlay.style.display = 'flex';
-    const internalClose = document.getElementById('internalModalClose');
-    const cancelAddLot = document.getElementById('cancelAddLot');
-    internalClose && internalClose.addEventListener('click', closeModal);
-    cancelAddLot && cancelAddLot.addEventListener('click', closeModal);
-    const addLotForm = document.getElementById('addLotForm');
-    addLotForm && addLotForm.addEventListener('submit', handleAddLotSubmit);
-  }
-
-  function closeModal() {
-    modalContent.innerHTML = '';
-    modalOverlay.style.display = 'none';
-  }
-
-  function handleAddLotSubmit(e) {
-    e.preventDefault();
-    const title = document.getElementById('lotTitle').value.trim() || 'Lot sans nom';
-    const price = document.getElementById('lotPrice').value.trim();
-    const location = document.getElementById('lotLocation').value.trim();
-    const description = document.getElementById('lotDescription').value.trim();
-    const photoInput = document.getElementById('lotPhotoInput');
-
-    if (photoInput && photoInput.files && photoInput.files[0]) {
-      const file = photoInput.files[0];
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const dataUrl = evt.target.result;
-        createLotCard({ title, price, location, description, photo: dataUrl });
+  // ---------- injecte input/photo si nécessaire ----------
+  function ensurePhotoControls(form){
+    if(!form) return null;
+    if(form.dataset.photoInjected === '1') {
+      return {
+        file: form.querySelector('#lotPhotoInput'),
+        preview: form.querySelector('#lotPhotoPreview'),
+        hidden: form.querySelector('input[name="photoData"]')
       };
-      reader.onerror = function() {
-        createLotCard({ title, price, location, description, photo: null });
-      };
-      reader.readAsDataURL(file);
-    } else {
-      createLotCard({ title, price, location, description, photo: null });
     }
 
-    closeModal();
-  }
+    // wrapper
+    const wrap = create('div',{ class:'form-group photo-field' });
+    const label = create('label',{ class:'form-label', text: 'Photo du lot' });
+    const file = create('input',{ type:'file', accept:'image/*', id:'lotPhotoInput', class:'form-input' });
+    const preview = create('img',{ id:'lotPhotoPreview', class:'photo-preview', alt:'Aperçu photo' });
+    const hidden = create('input',{ type:'hidden', name:'photoData', id:'lotPhotoData' });
 
-  function createLotCard(lot) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'lot-card';
+    wrap.appendChild(label);
+    wrap.appendChild(file);
+    wrap.appendChild(preview);
+    wrap.appendChild(hidden);
 
-    wrapper.innerHTML = `
-      <div class="lot-media">
-        <div class="lot-bg" ${lot.photo ? `style="background-image:url('${lot.photo}');"` : ''}></div>
-        <div class="lot-gradient"></div>
-        <div class="lot-media-info">
-          <h3 class="lot-title">${escapeHtml(lot.title)}</h3>
-          <div class="lot-sub">${escapeHtml(lot.location || '')}</div>
-        </div>
-      </div>
+    // insert before form actions if present
+    const actions = form.querySelector('.form-actions') || form.querySelector('button[type="submit"]')?.parentNode || null;
+    if(actions) actions.parentNode.insertBefore(wrap, actions);
+    else form.appendChild(wrap);
 
-      <div class="lot-card-body">
-        <div class="lot-meta">
-          <div class="lot-price">${lot.price ? formatCurrency(lot.price) : '-'}</div>
-          <div class="lot-status">Disponible</div>
-        </div>
-
-        <div class="lot-description">${escapeHtml(lot.description || '')}</div>
-
-        <div class="lot-actions">
-          <button class="lot-action-btn details">Détails</button>
-          <button class="lot-action-btn edit">Éditer</button>
-          <button class="lot-action-btn delete">Supprimer</button>
-        </div>
-      </div>
-    `;
-
-    if (lot.photo) {
-      wrapper.classList.add('has-photo');
-      const bg = wrapper.querySelector('.lot-bg');
-      bg.style.backgroundSize = 'cover';
-      bg.style.backgroundPosition = 'center';
-    }
-
-    wrapper.querySelector('.lot-action-btn.delete').addEventListener('click', () => wrapper.remove());
-
-    lotsGrid.prepend(wrapper);
-  }
-
-  function escapeHtml(s) {
-    if (!s) return '';
-    return s.replace(/[&<>"']/g, function (m) {
-      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+    // read & preview
+    file.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if(!f){
+        preview.classList.remove('visible'); preview.src=''; hidden.value=''; window._selectedLotPhotoDataURL = null;
+        return;
+      }
+      if(!f.type.startsWith('image/')) { alert('Choisis une image (jpg/png).'); file.value = ''; return; }
+      const r = new FileReader();
+      r.onload = (ev) => {
+        preview.src = ev.target.result;
+        preview.classList.add('visible');
+        hidden.value = ev.target.result;
+        window._selectedLotPhotoDataURL = ev.target.result;
+        console.log('Preview prête et hidden rempli (photoData)');
+      };
+      r.onerror = (err) => { console.error('FileReader error', err); alert('Impossible de lire l\'image'); };
+      r.readAsDataURL(f);
     });
+
+    form.dataset.photoInjected = '1';
+    return { file, preview, hidden };
   }
 
-  function formatCurrency(v) {
-    try {
-      const n = Number(v);
-      return n.toLocaleString('fr-FR') + ' FCFA';
-    } catch (err) {
-      return v + ' FCFA';
+  // ---------- crée une carte LOT dans #lotsGrid utilisant background div (fiable) ----------
+  function createLotCard({title,address,beds,baths,sqft,price,img}){
+    const grid = document.getElementById('lotsGrid');
+    if(!grid){
+      console.warn('lotsGrid introuvable (id="lotsGrid") — crée une div#lotsGrid pour voir les cartes.');
+      return;
     }
+
+    const card = create('div',{ class:'lot-card' });
+    const media = create('div',{ class:'lot-media' });
+    const bgDiv = create('div',{ class:'lot-bg-div' });
+    if(img) bgDiv.style.backgroundImage = `url('${img.replace(/'/g,"\\'")}')`;
+    else bgDiv.style.background = '#f6f7f9';
+    const grad = create('div',{ class:'lot-gradient' });
+    const info = create('div',{ class:'lot-info' });
+    const h = create('h3',{ text: title || 'Lot' });
+    const addr = create('div',{ text: address || '' });
+    info.appendChild(h); info.appendChild(addr);
+
+    media.appendChild(bgDiv); media.appendChild(grad); media.appendChild(info);
+
+    const body = create('div',{ class:'lot-body' });
+    const meta = create('div',{ text: (price? price : '') });
+    const actions = create('div',{ class:'lot-actions' });
+    const btn1 = create('button',{ class:'lot-action-btn', text: 'Détails' });
+    const btn2 = create('button',{ class:'lot-action-btn', text: 'Modifier' });
+    const btn3 = create('button',{ class:'lot-action-btn', text: 'Supprimer' });
+    btn3.addEventListener('click', ()=> card.remove());
+    actions.appendChild(btn1); actions.appendChild(btn2); actions.appendChild(btn3);
+    body.appendChild(meta); body.appendChild(actions);
+
+    card.appendChild(media); card.appendChild(body);
+
+    // insert on top
+    grid.insertAdjacentElement('afterbegin', card);
+    // small reveal
+    card.style.opacity = '0'; card.style.transform = 'translateY(8px)';
+    requestAnimationFrame(()=> { card.style.transition = 'opacity .28s ease, transform .28s ease'; card.style.opacity = '1'; card.style.transform = 'translateY(0)'; });
   }
 
-  addLotBtn && addLotBtn.addEventListener('click', () => openModal(buildAddLotForm()));
-  modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
-  modalClose && modalClose.addEventListener('click', () => { modalOverlay.style.display = 'none'; });
-});
+  // ---------- hook sur le formulaire existant dans le modal ----------
+  function attachToExistingForm(){
+    // try common selectors: #addLotForm, form in #modalContent, first .modal form
+    let form = document.getElementById('addLotForm');
+    const modalContent = document.getElementById('modalContent');
+    if(!form && modalContent) form = modalContent.querySelector('form') || modalContent.querySelector('.add-lot-form');
+    if(!form) form = document.querySelector('form.add-lot-form') || document.querySelector('form');
+
+    if(!form) { console.warn('Aucun formulaire détecté pour "Ajouter Lot".'); return; }
+    // avoid double attach
+    if(form.dataset._lotHook === '1') return;
+
+    const { file, preview, hidden } = ensurePhotoControls(form) || {};
+
+    form.addEventListener('submit', function(ev){
+      // allow programmatic submit to pass
+      if(form.dataset._submitting === '1'){ delete form.dataset._submitting; return; }
+
+      // récupère quelques champs si présents (non intrusif)
+      const title = (form.querySelector('#lotTitle') && form.querySelector('#lotTitle').value) || (form.querySelector('[name="title"]') && form.querySelector('[name="title"]').value) || (form.querySelector('input[placeholder*="Titre"]') && form.querySelector('input[placeholder*="Titre"]').value) || 'Lot';
+      const address = (form.querySelector('#lotAddress') && form.querySelector('#lotAddress').value) || (form.querySelector('[name="address"]') && form.querySelector('[name="address"]').value) || '';
+      const beds = (form.querySelector('#lotBeds') && form.querySelector('#lotBeds').value) || '';
+      const baths = (form.querySelector('#lotBaths') && form.querySelector('#lotBaths').value) || '';
+      const sqft = (form.querySelector('#lotSqft') && form.querySelector('#lotSqft').value) || '';
+      const price = (form.querySelector('#lotPrice') && form.querySelector('#lotPrice').value) || (form.querySelector('[name="price"]') && form.querySelector('[name="price"]').value) || '';
+
+      const fileEl = form.querySelector('#lotPhotoInput');
+      const f = fileEl && fileEl.files && fileEl.files[0];
+
+      // si pas d'image, crée la carte (placeholder) et laisse le submit continuer
+      if(!f){
+        createLotCard({ title, address, beds, baths, sqft, price, img: null });
+        return; // allow native submit/other handlers
+      }
+
+      // si image présente mais hidden est déjà rempli (image lue), on peut créer la carte et laisser submit se poursuivre
+      if(hidden && hidden.value){
+        createLotCard({ title, address, beds, baths, sqft, price, img: hidden.value });
+        return;
+      }
+
+      // sinon : on intercepte, lit la photo, crée la carte puis relance le submit
+      ev.preventDefault();
+      const reader = new FileReader();
+      reader.onload = function(e){
+        const dataUrl = e.target.result;
+        if(hidden) hidden.value = dataUrl;
+        window._selectedLotPhotoDataURL = dataUrl;
+
+        // create card immediately using background div approach
+        createLotCard({ title, address, beds, baths, sqft, price, img: dataUrl });
+
+        // now re-submit original form safely
+        form.dataset._submitting = '1';
+        // small timeout so UI updates (and hidden.value set)
+        setTimeout(()=> {
+          try { form.submit(); }
+          catch(err){
+            // fallback: dispatch native submit event (some apps catch it)
+            try { form.dispatchEvent(new Event('submit', {bubbles:true, cancelable:true})); } catch(e){}
+          }
+        }, 120);
+      };
+      reader.onerror = function(err){ console.error('FileReader error', err); alert('Impossible de lire l\'image'); createLotCard({ title, address, beds, baths, sqft, price, img: null }); };
+      reader.readAsDataURL(f);
+    });
+
+    form.dataset._lotHook = '1';
+    console.log('Injection photo liée au formulaire détecté et hookée.');
+  }
+
+  // Observe injection in modalContent (if the modal injects the form dynamically)
+  const modalContent = document.getElementById('modalContent');
+  if(modalContent){
+    const mo = new MutationObserver((mutations) => {
+      for(const m of mutations){
+        if(m.addedNodes && m.addedNodes.length){
+          attachToExistingForm();
+          break;
+        }
+      }
+    });
+    mo.observe(modalContent, { childList:true, subtree:true });
+    // try immediate attach
+    attachToExistingForm();
+  } else {
+    // fallback: try to attach once DOM loaded
+    document.addEventListener('DOMContentLoaded', attachToExistingForm);
+    setTimeout(attachToExistingForm, 600);
+  }
+
+  // debug helper
+  window.getSelectedLotPhotoDataURL = () => window._selectedLotPhotoDataURL || null;
+})();
+</script>
+
+
+
+
+
+
