@@ -3171,7 +3171,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if(ov && ov.style.display === 'flex') ov.style.display = 'none';
     });
   });
-
   // close overlay when content changed by your existing tab logic (optional)
   // si tu as un event dispatcher lors du changement d'onglet, lier ici:
   // document.addEventListener('app:tabChange', closeMobileMenu);
