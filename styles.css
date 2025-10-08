@@ -6454,3 +6454,60 @@ body.auth-locked {
 /* Optional: animate entrance */
 .auth-card { transform: translateY(8px); opacity: 0; animation: authIn .25s forwards ease-out; }
 @keyframes authIn { to { transform: translateY(0); opacity: 1; } }
+
+/* ---------- Auth screen - Bloquant complètement ---------- */
+#auth-screen {
+  position: fixed;
+  inset: 0;                 /* top:0; right:0; bottom:0; left:0; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary, #0b243b); /* couleur pleine du thème (pas transparent) */
+  color: #fff;
+  z-index: 99999;           /* très au-dessus */
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* rend le fond opaque et masque tout en dessous */
+#auth-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5,20,35,1), rgba(10,30,50,1));
+  opacity: 0.98;
+  z-index: -1;
+}
+
+/* Card */
+.auth-card {
+  width: 100%;
+  max-width: 920px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(2,6,23,0.6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  color: #fff;
+  position: relative;
+}
+
+/* Branding side */
+.auth-brand { padding: 28px; display:flex; flex-direction:column; gap:12px; justify-content:center;}
+.auth-brand h2 { margin:0; font-size:1.6rem; color:#fff; }
+.auth-brand p.small { opacity:0.9; color: #dceefb; }
+
+/* Forms side */
+.auth-forms { padding: 28px; display:flex; flex-direction:column; gap:12px; color: #fff; }
+.input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color:#fff; }
+.input::placeholder { color: rgba(255,255,255,0.65); }
+.btn { padding:10px 14px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+.btn-primary { background: linear-gradient(90deg, var(--secondary, #28a745), var(--secondary-light, #45c06b)); color:#fff; }
+.btn-ghost { background: transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; }
+
+/* Responsive */
+@media (max-width: 820px) { .auth-card { grid-template-columns: 1fr; } .auth-brand { display:none; } }
+
+/* Empêche scrolling global quand bloqué */
+body.auth-locked { overflow: hidden; height: 100vh; }
