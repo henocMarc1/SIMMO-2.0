@@ -25,68 +25,49 @@
   <meta http-equiv="Expires" content="0">
 </head>
 <body>
-  
-  <!-- Login / Signup simple -->
-<div id="auth-modal">
-  <div id="auth-forms">
-    <h3>Connexion</h3>
-    <input id="loginEmail" type="email" placeholder="email">
-    <input id="loginPassword" type="password" placeholder="mot de passe">
-    <button id="btnLogin">Se connecter</button>
+    
+    <!-- ---------- Auth screen (bloquant) ---------- -->
+<div id="auth-screen" aria-hidden="false">
+  <div class="auth-card" role="dialog" aria-labelledby="auth-title">
+    <div class="auth-brand">
+      <img src="logo.png" alt="logo" style="width:84px;height:auto;border-radius:8px;background:#fff;padding:6px" />
+      <h2 id="auth-title">NomDuSite</h2>
+      <p>Connecte-toi pour accéder à ton espace et retrouver tes données sur tous tes appareils.</p>
+      <p class="small">Pas de compte ? Inscris-toi — c'est rapide et sécurisé.</p>
+    </div>
 
-    <hr>
-    <h3>Inscription</h3>
-    <input id="signupName" type="text" placeholder="Nom">
-    <input id="signupEmail" type="email" placeholder="email">
-    <input id="signupPassword" type="password" placeholder="mot de passe">
-    <button id="btnSignup">S'inscrire</button>
+    <div class="auth-forms">
+      <div id="forms-wrapper">
+        <!-- Login form -->
+        <div id="login-form">
+          <h3>Se connecter</h3>
+          <input id="loginEmail" class="input" type="email" placeholder="Email" />
+          <input id="loginPassword" class="input" type="password" placeholder="Mot de passe" />
+          <div class="form-actions">
+            <button id="btnLogin" class="btn btn-primary">Se connecter</button>
+            <button id="show-signup" class="btn btn-ghost">S'inscrire</button>
+          </div>
+          <p class="small">Mot de passe oublié ? <a href="#" id="forgot-link">Réinitialiser</a></p>
+        </div>
+
+        <!-- Signup form (hidden by default) -->
+        <div id="signup-form" style="display:none;">
+          <h3>Créer un compte</h3>
+          <input id="signupName" class="input" type="text" placeholder="Nom complet" />
+          <input id="signupEmail" class="input" type="email" placeholder="Email" />
+          <input id="signupPassword" class="input" type="password" placeholder="Mot de passe (min 6 caractères)" />
+          <div class="form-actions">
+            <button id="btnSignup" class="btn btn-primary">S'inscrire</button>
+            <button id="show-login" class="btn btn-ghost">Retour</button>
+          </div>
+          <p class="small">En t'inscrivant, tu acceptes les conditions d'utilisation.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-
-<!-- Zone UI qui n'est visible que si connecté -->
-<div data-auth-only style="display:none;">
-  <div>Bonjour, <span id="user-name">Invité</span></div>
-  <div>Téléphone: <span id="profile-phone">-</span></div>
-  <pre id="user-raw-json" style="max-height:200px; overflow:auto;"></pre>
-  <button id="btnLogout">Se déconnecter</button>
-</div>
-
-<!-- Zone visible uniquement si non connecté -->
-<div data-unauth>
-  <p>Vous devez vous connecter pour utiliser l'application.</p>
-</div>
-
-<script type="module">
-  import { login, signup, logout } from './auth-protect.js';
-
-  document.getElementById('btnLogin').addEventListener('click', async ()=>{
-    const email = document.getElementById('loginEmail').value;
-    const pwd = document.getElementById('loginPassword').value;
-    try {
-      await login(email, pwd);
-      alert('Connecté !');
-    } catch(e) {
-      alert('Erreur login : ' + e.message);
-    }
-  });
-
-  document.getElementById('btnSignup').addEventListener('click', async ()=>{
-    const name = document.getElementById('signupName').value;
-    const email = document.getElementById('signupEmail').value;
-    const pwd = document.getElementById('signupPassword').value;
-    try {
-      await signup(email, pwd, name);
-      alert('Inscription OK — vous êtes connecté·e');
-    } catch(e) {
-      alert('Erreur inscription : ' + e.message);
-    }
-  });
-
-  document.getElementById('btnLogout').addEventListener('click', async ()=>{
-    await logout();
-    alert('Déconnecté');
-  });
-</script>
+<!-- ---------- /Auth screen ---------- -->
+    
   
     <div class="app-container">
 <header class="header">
