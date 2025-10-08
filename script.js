@@ -1,77 +1,18 @@
-import { auth } from './firebase-init.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    const event = new CustomEvent('firebase-user', { detail: { uid: user.uid, user } });
-    window.dispatchEvent(event);
-  }
-});
-
-// --- Synchronisation Firebase (à mettre tout en haut de script.js) ---
-import { listenToUserData, writeUserData } from './auth.js';
-
-let currentUid = null;
-let unsubscribeUserData = null;
-
-// Cet événement est déclenché par auth-protect.js quand l'utilisateur est connecté
-window.addEventListener('firebase-user', (e) => {
-  const { uid } = e.detail;
-  currentUid = uid;
-
-  console.log("Utilisateur connecté :", uid);
-
-  // Écoute les données de l'utilisateur en temps réel
-  unsubscribeUserData = listenToUserData(uid, (data) => {
-    console.log("Données chargées depuis Firebase :", data);
-
-    // Si aucune donnée, initialiser des valeurs par défaut
-    if (!data) {
-      data = { members: [], lots: [], payments: [] };
-    }
-
-    // Remplace ton ancien localStorage par ces données
-    loadAppData(data);
-  });
-});
-
-// Fonction qui recharge ton app avec les données de Firebase
-function loadAppData(data) {
-  // Ici tu adaptes selon ta logique actuelle :
-  // par exemple si tu avais :
-  // const members = JSON.parse(localStorage.getItem('payment_members') || "[]");
-  // -> tu remplaces par :
-  window.payment_members = data.members || [];
-  window.payment_lots = data.lots || [];
-  window.payment_records = data.payments || [];
-
-  // puis relance ton rendu ou tes statistiques
-  if (typeof renderAppFromData === 'function') {
-    renderAppFromData(data);
-  }
-}
-
-// Et quand tu veux enregistrer les données après une modification :
-function saveUserData() {
-  if (!currentUid) return;
-  const data = {
-    members: window.payment_members,
-    lots: window.payment_lots,
-    payments: window.payment_records
-  };
-  writeUserData(currentUid, data);
-  console.log("Données sauvegardées sur Firebase !");
-}
+import { db, auth } from './firebase-init.js';
+import { ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
 class PaymentManager {
     constructor() {
-        this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
-        this.payments = JSON.parse(localStorage.getItem('payment_records')) || [];
-        this.lots = JSON.parse(localStorage.getItem('payment_lots')) || [];
+        this.members = [];
+        this.payments = [];
+        this.lots = [];
         this.currentTab = 'dashboard';
         this.currentMonth = new Date().getMonth();
         this.currentYear = new Date().getFullYear();
+        this.user = null; // firebase user
         this.init();
+        this.initAuth(); // setup authentication and Firebase sync
     }
 
 getSvgIcon(name, size = 20) {
@@ -2898,10 +2839,177 @@ getMonthlyTotal() {
         return new Date(dateString).toLocaleDateString('fr-FR');
     }
 
-    saveData() {
-        localStorage.setItem('payment_members', JSON.stringify(this.members));
-        localStorage.setItem('payment_records', JSON.stringify(this.payments));
-        localStorage.setItem('payment_lots', JSON.stringify(this.lots));
+    
+
+    /* ---------------- Firebase Authentication & Sync ---------------- */
+    initAuth() {
+        // Create simple auth UI (modal) and setup listener
+        this.ensureAuthModal();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('Utilisateur connecté:', user.email);
+                this.user = user;
+                // Start syncing data from Firebase
+                this.initFirebaseSync();
+                // Hide auth modal if visible
+                const modal = document.getElementById('authModal');
+                if (modal) modal.style.display = 'none';
+                // update UI to show logged in state
+                this.updateAuthUI();
+            } else {
+                console.log('Aucun utilisateur connecté');
+                this.user = null;
+                // Clear local arrays (or keep them until login)
+                this.members = [];
+                this.payments = [];
+                this.lots = [];
+                // show auth modal
+                const modal = document.getElementById('authModal');
+                if (modal) modal.style.display = 'block';
+                this.updateAuthUI();
+            }
+        });
+    }
+
+    ensureAuthModal() {
+        if (document.getElementById('authModal')) return;
+        const html = `
+        <div id="authModal" style="position:fixed;left:0;top:0;right:0;bottom:0;
+            display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);z-index:9999;">
+          <div style="background:#fff;padding:20px;border-radius:8px;width:320px;max-width:90%;">
+            <h3 style="margin-top:0">Connexion</h3>
+            <div id="authError" style="color:#b00020;margin-bottom:8px;display:none;"></div>
+            <input id="authEmail" type="email" placeholder="Email" style="width:100%;padding:8px;margin-bottom:8px"/>
+            <input id="authPassword" type="password" placeholder="Mot de passe" style="width:100%;padding:8px;margin-bottom:12px"/>
+            <div style="display:flex;gap:8px;">
+              <button id="btnSignIn" style="flex:1;padding:8px">Se connecter</button>
+              <button id="btnSignUp" style="flex:1;padding:8px">S'inscrire</button>
+            </div>
+            <div style="margin-top:12px;text-align:right;">
+              <button id="btnAuthClose" style="background:none;border:none;color:#777">Fermer</button>
+            </div>
+          </div>
+        </div>`;
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        document.body.appendChild(div);
+        document.getElementById('btnSignIn').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value;
+            const pw = document.getElementById('authPassword').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, pw);
+                document.getElementById('authError').style.display = 'none';
+            } catch (e) {
+                const el = document.getElementById('authError');
+                el.textContent = e.message || 'Erreur connexion';
+                el.style.display = 'block';
+            }
+        });
+        document.getElementById('btnSignUp').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value;
+            const pw = document.getElementById('authPassword').value;
+            try {
+                await createUserWithEmailAndPassword(auth, email, pw);
+                document.getElementById('authError').style.display = 'none';
+            } catch (e) {
+                const el = document.getElementById('authError');
+                el.textContent = e.message || 'Erreur inscription';
+                el.style.display = 'block';
+            }
+        });
+        document.getElementById('btnAuthClose').addEventListener('click', () => {
+            const modal = document.getElementById('authModal');
+            if (modal) modal.style.display = 'none';
+        });
+    }
+
+    updateAuthUI() {
+        // Update a small auth status badge in the UI (create if needed)
+        let badge = document.getElementById('authBadge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'authBadge';
+            badge.style.position = 'fixed';
+            badge.style.right = '12px';
+            badge.style.top = '12px';
+            badge.style.zIndex = '9999';
+            badge.style.padding = '8px 12px';
+            badge.style.borderRadius = '20px';
+            badge.style.background = '#ffffffcc';
+            badge.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)';
+            document.body.appendChild(badge);
+        }
+        if (this.user) {
+            badge.innerHTML = `Connecté: ${this.user.email} <button id="btnSignOut" style="margin-left:8px;padding:6px 8px">Déconnexion</button>`;
+            document.getElementById('btnSignOut').addEventListener('click', async () => {
+                await signOut(auth);
+            });
+        } else {
+            badge.innerHTML = `<button id="btnShowAuth" style="padding:6px 10px">Connexion</button>`;
+            document.getElementById('btnShowAuth').addEventListener('click', () => {
+                const modal = document.getElementById('authModal');
+                if (modal) modal.style.display = 'flex';
+            });
+        }
+    }
+
+    initFirebaseSync() {
+        if (!this.user) return;
+        // members
+        const membersRef = ref(db, 'users/' + this.user.uid + '/members');
+        onValue(membersRef, snapshot => {
+            const val = snapshot.val() || {};
+            this.members = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+            if (typeof this.renderMembers === 'function') this.renderMembers();
+            if (typeof this.updateStats === 'function') this.updateStats();
+            if (typeof this.populateMonthFilters === 'function') this.populateMonthFilters();
+        });
+        // payments
+        const paymentsRef = ref(db, 'users/' + this.user.uid + '/payments');
+        onValue(paymentsRef, snapshot => {
+            const val = snapshot.val() || {};
+            this.payments = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+            if (typeof this.renderPayments === 'function') this.renderPayments();
+            if (typeof this.updateStats === 'function') this.updateStats();
+        });
+        // lots
+        const lotsRef = ref(db, 'users/' + this.user.uid + '/lots');
+        onValue(lotsRef, snapshot => {
+            const val = snapshot.val() || {};
+            this.lots = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+            if (typeof this.renderLots === 'function') this.renderLots();
+            if (typeof this.updateStats === 'function') this.updateStats();
+        });
+    }
+
+    async saveAllToFirebase() {
+        if (!this.user) {
+            console.warn('Aucune session utilisateur - les données ne seront pas sauvegardées.');
+            return;
+        }
+        const updates = {};
+        this.members.forEach(m => {
+            const id = m.id || push(ref(db, 'users/' + this.user.uid + '/members')).key;
+            updates[`users/${this.user.uid}/members/${id}`] = m;
+        });
+        this.payments.forEach(p => {
+            const id = p.id || push(ref(db, 'users/' + this.user.uid + '/payments')).key;
+            updates[`users/${this.user.uid}/payments/${id}`] = p;
+        });
+        this.lots.forEach(l => {
+            const id = l.id || push(ref(db, 'users/' + this.user.uid + '/lots')).key;
+            updates[`users/${this.user.uid}/lots/${id}`] = l;
+        });
+        await update(ref(db), updates);
+    }
+
+saveData() {
+        // Sauvegarde via Firebase si connecté
+        if (this.user) {
+            this.saveAllToFirebase().catch(e => console.error('Erreur sauvegarde Firebase', e));
+        } else {
+            console.log('saveData appelé mais utilisateur non connecté — aucune sauvegarde.');
+        }
     }
 
     showToast(message, type = 'success') {
@@ -3236,6 +3344,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(ov && ov.style.display === 'flex') ov.style.display = 'none';
     });
   });
+
   // close overlay when content changed by your existing tab logic (optional)
   // si tu as un event dispatcher lors du changement d'onglet, lier ici:
   // document.addEventListener('app:tabChange', closeMobileMenu);
