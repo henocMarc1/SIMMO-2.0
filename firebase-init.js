@@ -1,12 +1,9 @@
 // firebase-init.js
+// Type: module
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import {
-  getDatabase
-} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
-// Si tu préfères Firestore, remplace par getFirestore etc.
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
-// --- Ta config (déjà fournie) ---
 const firebaseConfig = {
   apiKey: "AIzaSyAn8qN6WNhQSByxJjppGNZXZ5B7_sG-MV4",
   authDomain: "simmo-21084.firebaseapp.com",
@@ -19,7 +16,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const rtdb = getDatabase(app);
+try { getAnalytics(app); } catch(e) { /* analytics peut échouer en local */ }
 
-export { app, auth, rtdb };
+const db = getDatabase(app);
+
+export { app, db };
