@@ -22,6 +22,69 @@
   <meta http-equiv="Expires" content="0">
 </head>
 <body>
+  
+  <!-- Login / Signup simple -->
+<div id="auth-modal">
+  <div id="auth-forms">
+    <h3>Connexion</h3>
+    <input id="loginEmail" type="email" placeholder="email">
+    <input id="loginPassword" type="password" placeholder="mot de passe">
+    <button id="btnLogin">Se connecter</button>
+
+    <hr>
+    <h3>Inscription</h3>
+    <input id="signupName" type="text" placeholder="Nom">
+    <input id="signupEmail" type="email" placeholder="email">
+    <input id="signupPassword" type="password" placeholder="mot de passe">
+    <button id="btnSignup">S'inscrire</button>
+  </div>
+</div>
+
+<!-- Zone UI qui n'est visible que si connecté -->
+<div data-auth-only style="display:none;">
+  <div>Bonjour, <span id="user-name">Invité</span></div>
+  <div>Téléphone: <span id="profile-phone">-</span></div>
+  <pre id="user-raw-json" style="max-height:200px; overflow:auto;"></pre>
+  <button id="btnLogout">Se déconnecter</button>
+</div>
+
+<!-- Zone visible uniquement si non connecté -->
+<div data-unauth>
+  <p>Vous devez vous connecter pour utiliser l'application.</p>
+</div>
+
+<script type="module">
+  import { login, signup, logout } from './auth-protect.js';
+
+  document.getElementById('btnLogin').addEventListener('click', async ()=>{
+    const email = document.getElementById('loginEmail').value;
+    const pwd = document.getElementById('loginPassword').value;
+    try {
+      await login(email, pwd);
+      alert('Connecté !');
+    } catch(e) {
+      alert('Erreur login : ' + e.message);
+    }
+  });
+
+  document.getElementById('btnSignup').addEventListener('click', async ()=>{
+    const name = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
+    const pwd = document.getElementById('signupPassword').value;
+    try {
+      await signup(email, pwd, name);
+      alert('Inscription OK — vous êtes connecté·e');
+    } catch(e) {
+      alert('Erreur inscription : ' + e.message);
+    }
+  });
+
+  document.getElementById('btnLogout').addEventListener('click', async ()=>{
+    await logout();
+    alert('Déconnecté');
+  });
+</script>
+  
     <div class="app-container">
 <header class="header">
     <div class="header-content">
