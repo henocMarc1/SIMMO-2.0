@@ -1,209 +1,144 @@
 // auth-protect.js
-// module pour gérer l'authentification via Firebase + modal login/register
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { auth, db } from './firebase-init.js';
 import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut,
-  sendPasswordResetEmail
+  onAuthStateChanged,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 import {
-  getFirestore,
   doc,
-  getDoc,
   setDoc,
-  onSnapshot
+  getDoc,
+  onSnapshot,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-/* --- copie ta config Firebase ici (fourni par toi) --- */
-const firebaseConfig = {
-  apiKey: "AIzaSyAn8qN6WNhQSByxJjppGNZXZ5B7_sG-MV4",
-  authDomain: "simmo-21084.firebaseapp.com",
-  databaseURL: "https://simmo-21084-default-rtdb.firebaseio.com",
-  projectId: "simmo-21084",
-  storageBucket: "simmo-21084.firebasestorage.app",
-  messagingSenderId: "260886429597",
-  appId: "1:260886429597:web:aeeb11ec2ad4715cf7b974",
-  measurementId: "G-SBENTVR4SZ"
-};
+/* -----------------------
+   Utilitaires DOM simples
+   ----------------------- */
+const $ = sel => document.querySelector(sel);
+const show = (el) => el && (el.style.display = '');
+const hide = (el) => el && (el.style.display = 'none');
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+/* -----------------------
+   Connexion / Inscription
+   ----------------------- */
+export async function signup(email, password, displayName = '') {
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = cred.user;
 
-// expose db/auth globalement pour que script.js puisse les importer si besoin
-window.__FB = { app, auth, db };
-
-/* ---------- Helper UI (modal login/register) ---------- */
-function buildAuthModal() {
-  if (document.getElementById('authModal')) return;
-
-  const html = `
-  <div id="authModal" class="auth-modal-overlay" aria-hidden="false">
-    <div class="auth-modal">
-      <button id="authClose" class="auth-close" title="Fermer">×</button>
-      <h2>Connexion / Inscription</h2>
-
-      <div class="auth-tabs">
-        <button id="tabLogin" class="active">Se connecter</button>
-        <button id="tabRegister">S'inscrire</button>
-      </div>
-
-      <form id="authForm">
-        <div class="auth-field">
-          <label for="authEmail">E-mail</label>
-          <input id="authEmail" type="email" required />
-        </div>
-        <div class="auth-field">
-          <label for="authPassword">Mot de passe</label>
-          <input id="authPassword" type="password" required minlength="6" />
-        </div>
-
-        <div id="registerExtra" style="display:none;">
-          <div class="auth-field">
-            <label for="authName">Nom complet</label>
-            <input id="authName" type="text" />
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button id="authSubmit" class="btn btn-primary" type="submit">Se connecter</button>
-          <button id="authReset" type="button" class="btn">Mot de passe ?</button>
-        </div>
-
-        <div id="authMessage" style="margin-top:10px;color:#c0392b;"></div>
-      </form>
-    </div>
-  </div>
-  `;
-
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = html;
-  document.body.appendChild(wrapper);
-
-  // events
-  const tabLogin = document.getElementById('tabLogin');
-  const tabRegister = document.getElementById('tabRegister');
-  const registerExtra = document.getElementById('registerExtra');
-  const authSubmit = document.getElementById('authSubmit');
-  const authForm = document.getElementById('authForm');
-  const authReset = document.getElementById('authReset');
-  const authClose = document.getElementById('authClose');
-  const authMessage = document.getElementById('authMessage');
-
-  tabLogin.addEventListener('click', () => {
-    tabLogin.classList.add('active');
-    tabRegister.classList.remove('active');
-    registerExtra.style.display = 'none';
-    authSubmit.textContent = 'Se connecter';
-  });
-
-  tabRegister.addEventListener('click', () => {
-    tabRegister.classList.add('active');
-    tabLogin.classList.remove('active');
-    registerExtra.style.display = 'block';
-    authSubmit.textContent = "S'inscrire";
-  });
-
-  authForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    authMessage.textContent = '';
-    const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPassword').value;
-    const name = document.getElementById('authName').value.trim();
-
-    if (tabLogin.classList.contains('active')) {
-      // login
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        authMessage.style.color = 'green';
-        authMessage.textContent = 'Connexion réussie…';
-        // modal will auto-close onAuthStateChanged
-      } catch (err) {
-        authMessage.style.color = '#c0392b';
-        authMessage.textContent = err.message;
-      }
-    } else {
-      // register
-      try {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCred.user.uid;
-        // create a minimal user doc in Firestore
-        await setDoc(doc(db, 'users', uid), {
-          profile: { email, name: name || null, createdAt: Date.now() },
-          data: { members: [], payments: [], lots: [] }
-        }, { merge: true });
-        authMessage.style.color = 'green';
-        authMessage.textContent = "Compte créé — vous êtes connecté.";
-      } catch (err) {
-        authMessage.style.color = '#c0392b';
-        authMessage.textContent = err.message;
-      }
+    // Mettre displayName (optionnel)
+    if (displayName) {
+      await updateProfile(user, { displayName });
     }
-  });
 
-  authReset.addEventListener('click', async () => {
-    const email = document.getElementById('authEmail').value.trim();
-    if (!email) { authMessage.textContent = 'Entrez votre e-mail pour réinitialiser.'; return; }
-    try {
-      await sendPasswordResetEmail(auth, email);
-      authMessage.style.color = 'green';
-      authMessage.textContent = 'E-mail de réinitialisation envoyé.';
-    } catch (err) {
-      authMessage.style.color = '#c0392b';
-      authMessage.textContent = err.message;
-    }
-  });
+    // Créer document user dans Firestore /users/{uid}
+    const userDoc = doc(db, 'users', user.uid);
+    await setDoc(userDoc, {
+      email: user.email,
+      displayName: displayName || user.email.split('@')[0],
+      createdAt: new Date().toISOString(),
+      // placez ici les champs initiaux propres à votre appli
+      profile: { phone: '', address: '' },
+      settings: { theme: 'light' }
+    });
 
-  authClose.addEventListener('click', () => {
-    // ne pas permettre la fermeture si pas connecté (force auth)
-    const modal = document.getElementById('authModal');
-    if (auth.currentUser) modal.style.display = 'none';
+    return user;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function login(email, password) {
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    return cred.user;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function logout() {
+  await signOut(auth);
+}
+
+/* -----------------------
+   Synchronisation des données utilisateur
+   ----------------------- */
+let currentUnsubscribe = null;
+
+function clearUserUI() {
+  // cacher éléments privés et afficher le formulaire de login
+  const userElements = document.querySelectorAll('[data-auth-only]');
+  userElements.forEach(el => hide(el));
+  const anonElements = document.querySelectorAll('[data-unauth]');
+  anonElements.forEach(el => show(el));
+  // vider champs affichage user
+  const nameEl = $('#user-name');
+  if (nameEl) nameEl.textContent = 'Invité';
+}
+
+/**
+ * Appelé quand un utilisateur est connecté.
+ * S'abonne au doc /users/{uid} et met à jour l'UI en temps réel.
+ */
+function watchUserDoc(uid) {
+  const userDocRef = doc(db, 'users', uid);
+
+  // Nettoyer subscription précédente si existe
+  if (currentUnsubscribe) currentUnsubscribe();
+
+  // onSnapshot -> mise à jour en temps réel (multi-appareils)
+  currentUnsubscribe = onSnapshot(userDocRef, (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    renderUserData(data);
+  }, (err) => {
+    console.error('Erreur écoute user doc:', err);
   });
 }
 
-function showModal() {
-  buildAuthModal();
-  const m = document.getElementById('authModal');
-  if (m) m.style.display = 'flex';
+/* -----------------------
+   Rend l'UI à partir des données user
+   ----------------------- */
+function renderUserData(userData) {
+  // Exemples : mettre à jour le nom, stats, etc.
+  const nameEl = $('#user-name');
+  if (nameEl) nameEl.textContent = userData.displayName || userData.email || 'Utilisateur';
+
+  // Afficher éléments privés
+  const userElements = document.querySelectorAll('[data-auth-only]');
+  userElements.forEach(el => show(el));
+  const anonElements = document.querySelectorAll('[data-unauth]');
+  anonElements.forEach(el => hide(el));
+
+  // Exemple : remplir un tableau, liste, etc.
+  const profilePhone = $('#profile-phone');
+  if (profilePhone) profilePhone.textContent = (userData.profile && userData.profile.phone) || '-';
+
+  // Si vous avez une zone JSON :
+  const rawJson = $('#user-raw-json');
+  if (rawJson) rawJson.textContent = JSON.stringify(userData, null, 2);
 }
 
-function hideModal() {
-  const m = document.getElementById('authModal');
-  if (m) m.style.display = 'none';
-}
-
-/* ---------- Auth state listener ---------- */
+/* -----------------------
+   OnAuthStateChanged : protèger l'app
+   ----------------------- */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // utilisateur connecté
-    hideModal();
-    // expose current user globalement
-    window.currentUser = user;
-
-    // inform the app (script.js) if présent
-    if (window.paymentManager && typeof window.paymentManager.loadUserData === 'function') {
-      try { await window.paymentManager.loadUserData(user.uid); } catch(e) { console.error(e); }
-    }
+    // Utilisateur connecté
+    watchUserDoc(user.uid);
   } else {
-    // pas connecté -> afficher modal, bloquer l'accès
-    showModal();
-    // reset global
-    window.currentUser = null;
+    // Utilisateur déconnecté
+    if (currentUnsubscribe) { currentUnsubscribe(); currentUnsubscribe = null; }
+    clearUserUI();
   }
 });
 
-/* ---------- helper pour logout accessible depuis UI --- */
-window.firebaseSignOut = async function() {
-  try {
-    await signOut(auth);
-    // après signOut, onAuthStateChanged affichera le modal
-  } catch(e) {
-    console.error('Sign out error', e);
-  }
-};
-
-export { auth, db, app };
+/* -----------------------
+   Exporte utilitaires DOM pour usage direct
+   ----------------------- */
+export { renderUserData };
