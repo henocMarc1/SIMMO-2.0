@@ -36,47 +36,42 @@
 </footer>
     
     
-    <!-- ---------- Auth screen (bloquant) ---------- -->
+<!-- ---------- AUTH SCREEN (bloquant) ---------- -->
 <div id="auth-screen" aria-hidden="false">
-  <div class="auth-card" role="dialog" aria-labelledby="auth-title">
+  <div class="auth-card" role="dialog" aria-labelledby="auth-title" style="max-width:900px;">
     <div class="auth-brand">
-      <img src="logo.png" alt="logo" style="width:84px;height:auto;border-radius:8px;background:#fff;padding:6px" />
+      <img src="logo.png" alt="logo" style="width:84px;height:auto;border-radius:8px;background:#fff;padding:6px"/>
       <h2 id="auth-title">NomDuSite</h2>
-      <p>Connecte-toi pour accéder à ton espace et retrouver tes données sur tous tes appareils.</p>
-      <p class="small">Pas de compte ? Inscris-toi — c'est rapide et sécurisé.</p>
+      <p class="small">Connecte-toi pour accéder à ton espace et retrouver tes données depuis tous tes appareils.</p>
     </div>
 
     <div class="auth-forms">
-      <div id="forms-wrapper">
-        <!-- Login form -->
-        <div id="login-form">
-          <h3>Se connecter</h3>
-          <input id="loginEmail" class="input" type="email" placeholder="Email" />
-          <input id="loginPassword" class="input" type="password" placeholder="Mot de passe" />
-          <div class="form-actions">
-            <button id="btnLogin" class="btn btn-primary">Se connecter</button>
-            <button id="show-signup" class="btn btn-ghost">S'inscrire</button>
-          </div>
-          <p class="small">Mot de passe oublié ? <a href="#" id="forgot-link">Réinitialiser</a></p>
+      <div id="login-form">
+        <h3>Se connecter</h3>
+        <input id="loginEmail" class="input" type="email" placeholder="Email" />
+        <input id="loginPassword" class="input" type="password" placeholder="Mot de passe" />
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="btnLogin" class="btn btn-primary">Se connecter</button>
+          <button id="show-signup" class="btn btn-ghost">S'inscrire</button>
         </div>
+        <p class="small" style="margin-top:8px;">Mot de passe oublié ? <a href="#" id="forgot-link" style="color:#fff; text-decoration:underline;">Réinitialiser</a></p>
+      </div>
 
-        <!-- Signup form (hidden by default) -->
-        <div id="signup-form" style="display:none;">
-          <h3>Créer un compte</h3>
-          <input id="signupName" class="input" type="text" placeholder="Nom complet" />
-          <input id="signupEmail" class="input" type="email" placeholder="Email" />
-          <input id="signupPassword" class="input" type="password" placeholder="Mot de passe (min 6 caractères)" />
-          <div class="form-actions">
-            <button id="btnSignup" class="btn btn-primary">S'inscrire</button>
-            <button id="show-login" class="btn btn-ghost">Retour</button>
-          </div>
-          <p class="small">En t'inscrivant, tu acceptes les conditions d'utilisation.</p>
+      <div id="signup-form" style="display:none;">
+        <h3>Créer un compte</h3>
+        <input id="signupName" class="input" type="text" placeholder="Nom complet" />
+        <input id="signupEmail" class="input" type="email" placeholder="Email" />
+        <input id="signupPassword" class="input" type="password" placeholder="Mot de passe (min 6 char)" />
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="btnSignup" class="btn btn-primary">S'inscrire</button>
+          <button id="show-login" class="btn btn-ghost">Retour</button>
         </div>
+        <p class="small" style="margin-top:8px;">En t'inscrivant, tu acceptes les conditions.</p>
       </div>
     </div>
   </div>
 </div>
-<!-- ---------- /Auth screen ---------- -->
+<!-- ---------- /AUTH SCREEN ---------- -->
     
   
     <div class="app-container">
