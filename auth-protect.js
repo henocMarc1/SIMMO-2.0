@@ -212,3 +212,81 @@ document.getElementById('show-login').addEventListener('click', () => {
   document.getElementById('signup-form').style.display = 'none';
   document.getElementById('login-form').style.display = 'block';
 });
+
+// --- Assure-toi d'importer auth, login, signup, logout, watchUserDoc, clearUserUI ---
+import { auth, login, signup, logout, watchUserDoc, clearUserUI } from './auth-protect.js'; 
+// si tes fonctions sont dans le même fichier, adapte les imports
+
+const authScreen = document.getElementById('auth-screen');
+const mainSelectors = ['main', 'header', 'footer', '.app', '#app']; // adapte selon ta structure
+function hideMainContent() {
+  mainSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => { el.dataset._oldDisplay = el.style.display || ''; el.style.display = 'none'; });
+  });
+}
+function showMainContent() {
+  mainSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => { el.style.display = el.dataset._oldDisplay || ''; delete el.dataset._oldDisplay; });
+  });
+}
+
+function lockUI() {
+  if (authScreen) { authScreen.style.display = 'flex'; authScreen.setAttribute('aria-hidden','false'); document.body.classList.add('auth-locked'); }
+  hideMainContent();
+}
+function unlockUI() {
+  if (authScreen) { authScreen.style.display = 'none'; authScreen.setAttribute('aria-hidden','true'); document.body.classList.remove('auth-locked'); }
+  showMainContent();
+}
+
+/* onAuth change : si connecté -> unlock + sync user data ; sinon -> lock */
+import { onAuthStateChanged, getIdToken } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // récupère token et initialise synchronisation côté backend
+    const idToken = await user.getIdToken();
+    // optionnel : envoie au backend pour récupérer/créer document MongoDB (voir partie B)
+    try {
+      const res = await fetch('/api/user', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + idToken, 'Content-Type': 'application/json' }
+      });
+      // gère la réponse (user data) si besoin
+      const data = await res.json();
+      console.log('User data from backend:', data);
+    } catch (e) { console.error('Erreur fetch backend user:', e); }
+
+    unlockUI();
+    watchUserDoc && user.uid && watchUserDoc(user.uid); // si tu utilises watchUserDoc côté client
+  } else {
+    lockUI();
+    clearUserUI && clearUserUI();
+  }
+});
+
+/* event handlers pour formulaires (login / signup) */
+document.getElementById('btnLogin').addEventListener('click', async ()=> {
+  const email = document.getElementById('loginEmail').value;
+  const pwd = document.getElementById('loginPassword').value;
+  try {
+    await login(email, pwd);
+    // onAuthStateChanged cachera l'écran
+  } catch(e) { alert('Erreur de connexion : ' + e.message); }
+});
+document.getElementById('btnSignup').addEventListener('click', async ()=> {
+  const name = document.getElementById('signupName').value;
+  const email = document.getElementById('signupEmail').value;
+  const pwd = document.getElementById('signupPassword').value;
+  try {
+    await signup(email, pwd, name);
+    // onAuthStateChanged cachera l'écran
+  } catch(e) { alert('Erreur inscription : ' + e.message); }
+});
+document.getElementById('show-signup').addEventListener('click', ()=> {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('signup-form').style.display = 'block';
+});
+document.getElementById('show-login').addEventListener('click', ()=> {
+  document.getElementById('signup-form').style.display = 'none';
+  document.getElementById('login-form').style.display = 'block';
+});
