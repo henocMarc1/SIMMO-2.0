@@ -3,66 +3,227 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Connexion - SIMMO</title>
-  <link rel="stylesheet" href="styles.css"> <!-- ton thème existant -->
+  <title>Connexion / Inscription — SIMMO</title>
+  <!-- Ta feuille de style principale (garde le même thème) -->
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* petits ajustements locaux si ton CSS principal n'a pas ces classes */
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg, #f7f9fc);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 920px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      background: var(--card-bg, #fff);
+      border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(20,30,50,0.08);
+      overflow: hidden;
+    }
+    .auth-panel {
+      padding: 28px;
+    }
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .brand h1 { font-size:20px; margin:0; }
+    .divider {
+      display:flex; align-items:center; justify-content:center;
+      font-size:13px; color:#888; padding:12px 0;
+    }
+    .hidden { display:none !important; }
+    .msg { color: #b00020; margin-top:8px; min-height:20px; }
+    @media (max-width:900px) {
+      .auth-card { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body class="login-page">
-  <main class="login-container">
-    <div class="login-card">
-      <h2>Connexion à SIMMO</h2>
+<body>
+  <main class="auth-wrapper">
+    <section class="auth-card" role="main" aria-labelledby="auth-title">
+      <!-- Left : illustration / message -->
+      <div class="auth-panel" style="background:linear-gradient(180deg,#075985 0%, #0284c7 100%); color:white;">
+        <div class="brand">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect width="24" height="24" rx="6" fill="white" opacity="0.08"/>
+            <path d="M6 12h12" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M8 8v8" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <div>
+            <h1 id="auth-title">SIMMO</h1>
+            <div style="opacity:.9; font-size:13px;">Gestion des membres & paiements</div>
+          </div>
+        </div>
 
-      <form id="loginForm">
-        <input type="email" id="email" placeholder="Email" required />
-        <input type="password" id="password" placeholder="Mot de passe" required />
-        <button type="submit" id="btnSignIn" class="btn btn-primary">Se connecter</button>
-      </form>
+        <h2 style="margin-top:18px; margin-bottom:8px;">Bienvenue</h2>
+        <p style="opacity:.95; line-height:1.5;">
+          Connecte-toi pour accéder à tes données. Si tu n'as pas de compte, utilise le formulaire d'inscription.
+          Tes données sont synchronisées et disponibles depuis tous tes appareils.
+        </p>
 
-      <div class="divider">ou</div>
+        <div class="divider" style="margin-top:18px;">Sécurisé par Firebase</div>
 
-      <form id="signUpForm">
-        <input type="text" id="displayName" placeholder="Nom complet" />
-        <input type="email" id="suEmail" placeholder="Email" required />
-        <input type="password" id="suPassword" placeholder="Mot de passe (min 6)" required />
-        <button type="submit" id="btnSignUp" class="btn btn-secondary">S'inscrire</button>
-      </form>
+        <p style="font-size:13px; opacity:.9; margin-top:10px;">
+          Besoin d'aide ? contacte l'administrateur.
+        </p>
+      </div>
 
-      <div id="message" class="msg"></div>
-    </div>
+      <!-- Right : forms -->
+      <div class="auth-panel" style="display:flex; flex-direction:column; justify-content:center;">
+        <!-- Toggles -->
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button id="btnShowLogin" class="btn">Connexion</button>
+          <button id="btnShowSignup" class="btn btn-outline">Inscription</button>
+        </div>
+
+        <!-- Connexion -->
+        <form id="loginForm" class="auth-form" aria-label="Formulaire de connexion">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="ton.email@exemple.com" required />
+
+          <label for="password">Mot de passe</label>
+          <input id="password" type="password" placeholder="••••••••" minlength="6" required />
+
+          <button type="submit" class="btn btn-primary" style="margin-top:12px;">Se connecter</button>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <a href="#" id="forgotPasswordLink" style="font-size:13px;">Mot de passe oublié ?</a>
+            <span id="loginLoader" class="hidden">⏳</span>
+          </div>
+
+          <div id="loginMsg" class="msg" role="status" aria-live="polite"></div>
+        </form>
+
+        <!-- Inscription -->
+        <form id="signupForm" class="auth-form hidden" aria-label="Formulaire d'inscription">
+          <label for="displayName">Nom complet</label>
+          <input id="displayName" type="text" placeholder="Ton nom complet" />
+
+          <label for="suEmail">Email</label>
+          <input id="suEmail" type="email" placeholder="ton.email@exemple.com" required />
+
+          <label for="suPassword">Mot de passe</label>
+          <input id="suPassword" type="password" placeholder="Au moins 6 caractères" minlength="6" required />
+
+          <button type="submit" class="btn btn-primary" style="margin-top:12px;">S'inscrire</button>
+
+          <div id="signupMsg" class="msg" role="status" aria-live="polite"></div>
+        </form>
+
+        <!-- Option import/export or info -->
+        <div style="margin-top:14px; font-size:13px; color:#555;">
+          <em>Astuce :</em> utilise le même compte pour retrouver tes données sur un autre appareil.
+        </div>
+      </div>
+    </section>
   </main>
 
+  <!-- Script : utilise les fonctions signIn/signUp exportées par auth.js -->
   <script type="module">
     import { signIn, signUp } from './auth.js';
+    import { auth } from './firebase-init.js';
+    import { onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
+    // Elements
+    const btnShowLogin = document.getElementById('btnShowLogin');
+    const btnShowSignup = document.getElementById('btnShowSignup');
     const loginForm = document.getElementById('loginForm');
-    const signUpForm = document.getElementById('signUpForm');
-    const msg = document.getElementById('message');
+    const signupForm = document.getElementById('signupForm');
+    const loginMsg = document.getElementById('loginMsg');
+    const signupMsg = document.getElementById('signupMsg');
+    const loginLoader = document.getElementById('loginLoader');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 
+    function showLogin() {
+      loginForm.classList.remove('hidden');
+      signupForm.classList.add('hidden');
+      loginMsg.textContent = '';
+      signupMsg.textContent = '';
+    }
+    function showSignup() {
+      signupForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      loginMsg.textContent = '';
+      signupMsg.textContent = '';
+    }
+
+    // toggle handlers
+    btnShowLogin.addEventListener('click', (e) => { e.preventDefault(); showLogin(); });
+    btnShowSignup.addEventListener('click', (e) => { e.preventDefault(); showSignup(); });
+
+    // Redirect immediately if already logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // redirige vers l'app principale
+        location.replace('index.html');
+      }
+    });
+
+    // Sign-in
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.textContent = '';
+      loginMsg.textContent = '';
+      loginLoader.classList.remove('hidden');
       try {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
+        if (!email || !password) throw new Error('Email et mot de passe requis.');
         await signIn({ email, password });
-        // onAuthStateChanged dans auth-protect.js redirigera automatiquement
+        // onAuthStateChanged s'occupera de la redirection
       } catch (err) {
-        msg.textContent = 'Erreur connexion : ' + err.message;
+        loginMsg.textContent = 'Erreur : ' + (err.message || err);
+      } finally {
+        loginLoader.classList.add('hidden');
       }
     });
 
-    signUpForm.addEventListener('submit', async (e) => {
+    // Sign-up
+    signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.textContent = '';
+      signupMsg.textContent = '';
       try {
-        const email = document.getElementById('suEmail').value;
+        const email = document.getElementById('suEmail').value.trim();
         const password = document.getElementById('suPassword').value;
-        const displayName = document.getElementById('displayName').value;
+        const displayName = document.getElementById('displayName').value.trim();
+        if (!email || !password) throw new Error('Email et mot de passe requis.');
+        if (password.length < 6) throw new Error('Le mot de passe doit contenir au moins 6 caractères.');
         await signUp({ email, password, displayName });
-        // l'utilisateur est connecté après signup
+        // utilisateur connecté automatiquement après l'inscription
+        // onAuthStateChanged redirigera vers index.html
       } catch (err) {
-        msg.textContent = 'Erreur inscription : ' + err.message;
+        signupMsg.textContent = 'Erreur : ' + (err.message || err);
       }
     });
+
+    // Mot de passe oublié
+    forgotPasswordLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) {
+        loginMsg.textContent = 'Entrez votre email puis cliquez sur "Mot de passe oublié".';
+        return;
+      }
+      loginMsg.textContent = 'Envoi du lien...';
+      try {
+        await sendPasswordResetEmail(auth, email);
+        loginMsg.textContent = 'Lien de réinitialisation envoyé à ' + email;
+      } catch (err) {
+        loginMsg.textContent = 'Erreur : ' + (err.message || err);
+      }
+    });
+
+    // Affiche la section par défaut
+    showLogin();
   </script>
 </body>
 </html>
