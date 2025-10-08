@@ -1,3 +1,58 @@
+// --- Synchronisation Firebase (à mettre tout en haut de script.js) ---
+import { listenToUserData, writeUserData } from './auth.js';
+
+let currentUid = null;
+let unsubscribeUserData = null;
+
+// Cet événement est déclenché par auth-protect.js quand l'utilisateur est connecté
+window.addEventListener('firebase-user', (e) => {
+  const { uid } = e.detail;
+  currentUid = uid;
+
+  console.log("Utilisateur connecté :", uid);
+
+  // Écoute les données de l'utilisateur en temps réel
+  unsubscribeUserData = listenToUserData(uid, (data) => {
+    console.log("Données chargées depuis Firebase :", data);
+
+    // Si aucune donnée, initialiser des valeurs par défaut
+    if (!data) {
+      data = { members: [], lots: [], payments: [] };
+    }
+
+    // Remplace ton ancien localStorage par ces données
+    loadAppData(data);
+  });
+});
+
+// Fonction qui recharge ton app avec les données de Firebase
+function loadAppData(data) {
+  // Ici tu adaptes selon ta logique actuelle :
+  // par exemple si tu avais :
+  // const members = JSON.parse(localStorage.getItem('payment_members') || "[]");
+  // -> tu remplaces par :
+  window.payment_members = data.members || [];
+  window.payment_lots = data.lots || [];
+  window.payment_records = data.payments || [];
+
+  // puis relance ton rendu ou tes statistiques
+  if (typeof renderAppFromData === 'function') {
+    renderAppFromData(data);
+  }
+}
+
+// Et quand tu veux enregistrer les données après une modification :
+function saveUserData() {
+  if (!currentUid) return;
+  const data = {
+    members: window.payment_members,
+    lots: window.payment_lots,
+    payments: window.payment_records
+  };
+  writeUserData(currentUid, data);
+  console.log("Données sauvegardées sur Firebase !");
+}
+
 class PaymentManager {
     constructor() {
         this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
