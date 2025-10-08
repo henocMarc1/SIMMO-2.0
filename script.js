@@ -519,50 +519,7 @@ getSvgIcon(name, size = 20) {
         this.populateFilters();
     }
 
-    loadDefaultLots() {
-        if (this.lots.length === 0) {
-            this.lots = [
-                {
-                    id: this.generateId(),
-                    name: 'Villa Moderne A',
-                    price: 25000000,
-                    description: 'Villa moderne 4 chambres avec jardin',
-                    location: 'Cocody',
-                    available: true,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: this.generateId(),
-                    name: 'Appartement Standing B',
-                    price: 15000000,
-                    description: 'Appartement 3 pièces en résidence fermée',
-                    location: 'Plateau',
-                    available: true,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: this.generateId(),
-                    name: 'Terrain Constructible C',
-                    price: 8000000,
-                    description: 'Terrain de 500m² avec titre foncier',
-                    location: 'Angré',
-                    available: true,
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: this.generateId(),
-                    name: 'Duplex Premium D',
-                    price: 35000000,
-                    description: 'Duplex 5 chambres avec piscine',
-                    location: 'Riviera',
-                    available: true,
-                    createdAt: new Date().toISOString()
-                }
-            ];
-            this.saveData();
-        }
 
-    }
 
 renderLotMembersNew(membersWithLot, lot) {
     const container = document.getElementById('lotMembersList');
