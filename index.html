@@ -26,6 +26,16 @@
 </head>
 <body>
     
+    <main data-auth-only style="display:none;">
+  <!-- tout le site / dashboard / contenu privé ici -->
+</main>
+
+<!-- contenu public limité (ex: footer minimal) -->
+<footer data-unauth>
+  <p>Version publique limitée</p>
+</footer>
+    
+    
     <!-- ---------- Auth screen (bloquant) ---------- -->
 <div id="auth-screen" aria-hidden="false">
   <div class="auth-card" role="dialog" aria-labelledby="auth-title">
