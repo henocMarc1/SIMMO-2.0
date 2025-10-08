@@ -142,3 +142,73 @@ onAuthStateChanged(auth, async (user) => {
    Exporte utilitaires DOM pour usage direct
    ----------------------- */
 export { renderUserData };
+
+
+// Présuppose que auth et onAuthStateChanged ont déjà été importés/initialisés
+const authScreen = document.getElementById('auth-screen');
+
+function lockUI() {
+  if (authScreen) {
+    authScreen.style.display = 'flex';
+    authScreen.setAttribute('aria-hidden','false');
+    document.body.classList.add('auth-locked');
+  }
+}
+
+function unlockUI() {
+  if (authScreen) {
+    authScreen.style.display = 'none';
+    authScreen.setAttribute('aria-hidden','true');
+    document.body.classList.remove('auth-locked');
+  }
+}
+
+/* appelé par onAuthStateChanged */
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Utilisateur connecté -> on montre le site
+    unlockUI();
+
+    // (si tu veux garder l'écoute realtime user doc) :
+    watchUserDoc(user.uid);
+  } else {
+    // pas connecté -> on bloque tout le site
+    lockUI();
+    // cache toutes les sections privées si utilisées
+    clearUserUI();
+  }
+});
+
+/* Contrôles du formulaire d'auth (interactions) */
+document.getElementById('btnLogin').addEventListener('click', async () => {
+  try {
+    const email = document.getElementById('loginEmail').value;
+    const pwd = document.getElementById('loginPassword').value;
+    await login(email, pwd); // importe login depuis ton module
+    // onAuthStateChanged se chargera de cacher l'écran
+  } catch (e) {
+    alert('Erreur de connexion : ' + e.message);
+  }
+});
+
+document.getElementById('btnSignup').addEventListener('click', async () => {
+  try {
+    const name = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
+    const pwd = document.getElementById('signupPassword').value;
+    await signup(email, pwd, name);
+    // onAuthStateChanged cachera l'écran de lui-même
+  } catch (e) {
+    alert('Erreur d\'inscription : ' + e.message);
+  }
+});
+
+/* basculement login <-> signup */
+document.getElementById('show-signup').addEventListener('click', () => {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('signup-form').style.display = 'block';
+});
+document.getElementById('show-login').addEventListener('click', () => {
+  document.getElementById('signup-form').style.display = 'none';
+  document.getElementById('login-form').style.display = 'block';
+});
