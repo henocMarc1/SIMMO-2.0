@@ -1,3 +1,13 @@
+import { auth } from './firebase-init.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const event = new CustomEvent('firebase-user', { detail: { uid: user.uid, user } });
+    window.dispatchEvent(event);
+  }
+});
+
 // --- Synchronisation Firebase (à mettre tout en haut de script.js) ---
 import { listenToUserData, writeUserData } from './auth.js';
 
