@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connexion - SIMMO</title>
+  <link rel="stylesheet" href="styles.css"> <!-- ton thème existant -->
+</head>
+<body class="login-page">
+  <main class="login-container">
+    <div class="login-card">
+      <h2>Connexion à SIMMO</h2>
+
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Mot de passe" required />
+        <button type="submit" id="btnSignIn" class="btn btn-primary">Se connecter</button>
+      </form>
+
+      <div class="divider">ou</div>
+
+      <form id="signUpForm">
+        <input type="text" id="displayName" placeholder="Nom complet" />
+        <input type="email" id="suEmail" placeholder="Email" required />
+        <input type="password" id="suPassword" placeholder="Mot de passe (min 6)" required />
+        <button type="submit" id="btnSignUp" class="btn btn-secondary">S'inscrire</button>
+      </form>
+
+      <div id="message" class="msg"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { signIn, signUp } from './auth.js';
+
+    const loginForm = document.getElementById('loginForm');
+    const signUpForm = document.getElementById('signUpForm');
+    const msg = document.getElementById('message');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      try {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        await signIn({ email, password });
+        // onAuthStateChanged dans auth-protect.js redirigera automatiquement
+      } catch (err) {
+        msg.textContent = 'Erreur connexion : ' + err.message;
+      }
+    });
+
+    signUpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      try {
+        const email = document.getElementById('suEmail').value;
+        const password = document.getElementById('suPassword').value;
+        const displayName = document.getElementById('displayName').value;
+        await signUp({ email, password, displayName });
+        // l'utilisateur est connecté après signup
+      } catch (err) {
+        msg.textContent = 'Erreur inscription : ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
