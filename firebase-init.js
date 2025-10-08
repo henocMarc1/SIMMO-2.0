@@ -1,9 +1,12 @@
 // firebase-init.js
-// import et initialisation centralisée
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import {
+  getDatabase
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+// Si tu préfères Firestore, remplace par getFirestore etc.
 
+// --- Ta config (déjà fournie) ---
 const firebaseConfig = {
   apiKey: "AIzaSyAn8qN6WNhQSByxJjppGNZXZ5B7_sG-MV4",
   authDomain: "simmo-21084.firebaseapp.com",
@@ -17,6 +20,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const rtdb = getDatabase(app);
 
-export { app, auth, db };
+export { app, auth, rtdb };
