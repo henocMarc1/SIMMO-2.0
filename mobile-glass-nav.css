@@ -3,6 +3,7 @@
     .header-nav { display: none !important; }
     .app-container { padding-bottom: 85px !important; }
     
+    /* Barre de navigation en bas */
     .bottom-nav {
         position: fixed;
         bottom: 0;
@@ -18,38 +19,54 @@
         animation: slideUp 0.4s ease;
     }
     
+    /* Container centré */
     .bottom-nav-container {
         display: flex;
         justify-content: space-around;
-        padding: 8px 0;
+        align-items: center;
+        padding: 10px 0;
+        margin: 0 auto;
     }
     
+    /* Boutons centrés */
     .bottom-nav-btn {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 4px;
-        padding: 6px 12px;
+        justify-content: center;
+        gap: 3px;
+        padding: 8px 10px;
         background: transparent;
         border: none;
-        border-radius: 12px;
-        min-width: 60px;
+        border-radius: 14px;
+        flex: 1;
+        max-width: 75px;
         transition: all 0.3s;
     }
     
+    /* Icône centrée */
     .bottom-nav-btn i {
-        font-size: 22px;
+        font-size: 24px;
         color: #6B7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
         transition: all 0.3s;
     }
     
+    /* Texte centré */
     .bottom-nav-btn span {
         font-size: 10px;
         font-weight: 500;
         color: #6B7280;
+        text-align: center;
+        width: 100%;
         transition: all 0.3s;
     }
     
+    /* État actif */
     .bottom-nav-btn.active {
         background: rgba(99, 102, 241, 0.12);
     }
@@ -59,12 +76,25 @@
         color: #6366F1;
     }
     
+    .bottom-nav-btn.active i {
+        transform: scale(1.08);
+    }
+    
+    .bottom-nav-btn.active span {
+        font-weight: 600;
+    }
+    
+    /* Animation tap */
     .bottom-nav-btn:active {
-        transform: scale(0.94);
+        transform: scale(0.92);
     }
     
     @keyframes slideUp {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
+}
+
+@media (min-width: 769px) {
+    .bottom-nav { display: none !important; }
 }
