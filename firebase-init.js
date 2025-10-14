@@ -1,7 +1,5 @@
-// firebase-init.js
-// Type: module
+// firebase-init.js (module)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -16,8 +14,4 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-try { getAnalytics(app); } catch(e) { /* analytics peut échouer en local */ }
-
-const db = getDatabase(app);
-
-export { app, db };
+export const db = getDatabase(app);
