@@ -614,50 +614,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script>
-    // === Keep bottom nav visible (robuste contre autres scripts) ===
-(function keepBottomNavVisible(){
-  const bottomNav = document.querySelector('.bottom-nav');
-  if (!bottomNav) return;
-
-  // Fonction qui applique les styles de "visibilité permanente"
-  function forceVisible() {
-    bottomNav.style.display = 'flex';
-    bottomNav.style.position = 'fixed';
-    bottomNav.style.bottom = '0';
-    bottomNav.style.left = '0';
-    bottomNav.style.right = '0';
-    bottomNav.style.visibility = 'visible';
-    bottomNav.style.opacity = '1';
-    bottomNav.style.transform = 'translateY(0)';
-    bottomNav.style.transition = 'none';
-    bottomNav.style.pointerEvents = 'auto';
-    bottomNav.style.zIndex = '99999';
-  }
-
-  // Appel initial
-  forceVisible();
-
-  // Throttle avec requestAnimationFrame pour scroll/touch
-  let ticking = false;
-  function onFastEvent() {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(() => {
-        forceVisible();
-        ticking = false;
-      });
-    }
-  }
-
-  window.addEventListener('scroll', onFastEvent, { passive: true });
-  window.addEventListener('touchmove', onFastEvent, { passive: true });
-  window.addEventListener('resize', onFastEvent);
-  // Observateur pour tout changement de classe/style
-  const obs = new MutationObserver(() => forceVisible());
-  obs.observe(bottomNav, { attributes: true, attributeFilter: ['style', 'class'] });
-})();
-</script>
-
 </body>
 </html>
