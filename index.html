@@ -558,7 +558,61 @@ window.addEventListener('load', () => {
   }
 });
 </script>
+<!-- Navigation mobile en bas (Style iOS) -->
+<nav class="bottom-nav">
+    <div class="bottom-nav-container">
+        <button class="bottom-nav-btn active" data-tab="dashboard">
+            <i class="fas fa-chart-pie"></i>
+            <span>Tableau</span>
+        </button>
+        
+        <button class="bottom-nav-btn" data-tab="members">
+            <i class="fas fa-users"></i>
+            <span>Membres</span>
+        </button>
+        
+        <button class="bottom-nav-btn" data-tab="lots">
+            <i class="fas fa-home"></i>
+            <span>Lots</span>
+        </button>
+        
+        <button class="bottom-nav-btn" data-tab="payments">
+            <i class="fas fa-credit-card"></i>
+            <span>Paiements</span>
+        </button>
+        
+        <button class="bottom-nav-btn" data-tab="statistics">
+            <i class="fas fa-chart-line"></i>
+            <span>Stats</span>
+        </button>
+    </div>
+</nav>
 
+<!-- Script de synchronisation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bottomBtns = document.querySelectorAll('.bottom-nav-btn');
+    const desktopBtns = document.querySelectorAll('.header-nav .nav-tab');
+    
+    function setActive(tabName) {
+        bottomBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+        desktopBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+    }
+    
+    bottomBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            const desktop = document.querySelector(`.header-nav .nav-tab[data-tab="${tab}"]`);
+            if (desktop) desktop.click();
+            setActive(tab);
+        });
+    });
+    
+    desktopBtns.forEach(btn => {
+        btn.addEventListener('click', () => setActive(btn.dataset.tab));
+    });
+});
+</script>
 
 </body>
 </html>
