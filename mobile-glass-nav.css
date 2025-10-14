@@ -85,7 +85,7 @@
     }
     
     /* Animation tap */
-    .bottom-nav-btn:active {
+    .bottom-nav-btn:active { 
         transform: scale(0.92);
     }
     
