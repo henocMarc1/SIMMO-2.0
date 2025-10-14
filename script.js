@@ -1,13 +1,48 @@
 class PaymentManager {
     constructor() {
-        this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
-        this.payments = JSON.parse(localStorage.getItem('payment_records')) || [];
-        this.lots = JSON.parse(localStorage.getItem('payment_lots')) || [];
+     this.db = firebase.database();
+this.members = [];
+this.payments = [];
+this.lots = [];
         this.currentTab = 'dashboard';
         this.currentMonth = new Date().getMonth();
         this.currentYear = new Date().getFullYear();
         this.init();
     }
+    loadFromFirebase() {
+    // Charger membres en temps réel
+    this.db.ref('members').on('value', (snapshot) => {
+        this.members = snapshot.val() || [];
+        this.renderMembers();
+        this.updateDashboard();
+    });
+
+    // Charger paiements en temps réel
+    this.db.ref('payments').on('value', (snapshot) => {
+        this.payments = snapshot.val() || [];
+        this.renderPayments();
+        this.updateDashboard();
+    });
+
+    // Charger lots en temps réel
+    this.db.ref('lots').on('value', (snapshot) => {
+        this.lots = snapshot.val() || [];
+        this.renderLots();
+        this.updateDashboard();
+    });
+}
+
+saveMembers() {
+    this.db.ref('members').set(this.members);
+}
+
+savePayments() {
+    this.db.ref('payments').set(this.payments);
+}
+
+saveLots() {
+    this.db.ref('lots').set(this.lots);
+}
 
 getSvgIcon(name, size = 20) {
     const s = Number(size);
@@ -2791,9 +2826,9 @@ getMonthlyTotal() {
     }
 
     saveData() {
-        localStorage.setItem('payment_members', JSON.stringify(this.members));
-        localStorage.setItem('payment_records', JSON.stringify(this.payments));
-        localStorage.setItem('payment_lots', JSON.stringify(this.lots));
+        this.saveMembers();
+this.savePayments();
+this.saveLots();
     }
 
     showToast(message, type = 'success') {
