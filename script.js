@@ -1,3 +1,41 @@
+// FORCER LA NAVBAR À RESTER VISIBLE SUR MOBILE
+document.addEventListener('DOMContentLoaded', function() {
+    const bottomNav = document.querySelector('.bottom-nav');
+    
+    if (bottomNav && window.innerWidth <= 768) {
+        // Forcer l'affichage permanent
+        bottomNav.style.display = 'flex';
+        bottomNav.style.position = 'fixed';
+        bottomNav.style.bottom = '0';
+        bottomNav.style.visibility = 'visible';
+        bottomNav.style.opacity = '1';
+        bottomNav.style.transform = 'translateY(0)';
+        
+        // Empêcher tout script de la cacher
+        const observer = new MutationObserver(function() {
+            if (window.innerWidth <= 768) {
+                bottomNav.style.display = 'flex';
+                bottomNav.style.visibility = 'visible';
+                bottomNav.style.opacity = '1';
+                bottomNav.style.transform = 'translateY(0)';
+            }
+        });
+        
+        observer.observe(bottomNav, {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+    }
+    
+    // Désactiver tout événement scroll qui cache la navbar
+    window.removeEventListener('scroll', hideNavbarOnScroll);
+});
+
+// Fonction vide pour remplacer d'éventuelles fonctions de masquage
+function hideNavbarOnScroll() {
+    // Ne rien faire - navbar toujours visible
+}
+
 class PaymentManager {
     constructor() {
      this.db = firebase.database();
