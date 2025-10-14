@@ -1,124 +1,100 @@
 @media (max-width: 768px) {
-    /* Masquer menu desktop */
-    .mobile-menu { 
-        display: flex !important;
-    }
+    .mobile-menu { display: none !important; }
+    .header-nav { display: none !important; }
+    .app-container { padding-bottom: 85px !important; }
     
-    .header-nav { 
-        display: none !important; 
-    }
-    
-    /* Padding pour le contenu */
-    .app-container { 
-        padding-bottom: 90px !important; 
-    }
-    
-    body {
-        padding-bottom: 90px !important;
-    }
-    
-    /* NAVBAR TOUJOURS FIXÉE EN BAS */
+    /* Barre de navigation en bas */
     .bottom-nav {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        z-index: 99999 !important;
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(20px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-        border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15) !important;
-        padding: 10px 0 !important;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-        transition: none !important;
-        pointer-events: all !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.08);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        animation: slideUp 0.4s ease;
     }
     
-    /* Container */
+    /* Container centré */
     .bottom-nav-container {
-        display: flex !important;
-        justify-content: space-evenly !important;
-        align-items: center !important;
-        width: 100% !important;
-        padding: 0 8px !important;
-        margin: 0 auto !important;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px 0;
+        margin: 0 auto;
     }
     
-    /* Boutons */
+    /* Boutons centrés */
     .bottom-nav-btn {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 4px !important;
-        padding: 8px 6px !important;
-        background: transparent !important;
-        border: none !important;
-        border-radius: 12px !important;
-        flex: 1 !important;
-        max-width: 75px !important;
-        transition: all 0.2s ease !important;
-        cursor: pointer !important;
-        -webkit-tap-highlight-color: transparent !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 8px 10px;
+        background: transparent;
+        border: none;
+        border-radius: 14px;
+        flex: 1;
+        max-width: 75px;
+        transition: all 0.3s;
     }
     
-    /* Icônes */
-    .bottom-nav-btn i,
-    .bottom-nav-btn img {
-        font-size: 22px !important;
-        width: 22px !important;
-        height: 22px !important;
-        color: #6B7280 !important;
-        transition: all 0.2s ease !important;
+    /* Icône centrée */
+    .bottom-nav-btn i {
+        font-size: 24px;
+        color: #6B7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        transition: all 0.3s;
     }
     
-    /* Texte */
+    /* Texte centré */
     .bottom-nav-btn span {
-        font-size: 10px !important;
-        font-weight: 500 !important;
-        color: #6B7280 !important;
-        text-align: center !important;
-        transition: all 0.2s ease !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        font-size: 10px;
+        font-weight: 500;
+        color: #6B7280;
+        text-align: center;
+        width: 100%;
+        transition: all 0.3s;
     }
     
     /* État actif */
     .bottom-nav-btn.active {
-        background: rgba(99, 102, 241, 0.15) !important;
+        background: rgba(99, 102, 241, 0.12);
     }
     
     .bottom-nav-btn.active i,
-    .bottom-nav-btn.active img,
     .bottom-nav-btn.active span {
-        color: #6366F1 !important;
+        color: #6366F1;
     }
     
-    .bottom-nav-btn.active i,
-    .bottom-nav-btn.active img {
-        transform: scale(1.1) !important;
+    .bottom-nav-btn.active i {
+        transform: scale(1.08);
     }
     
     .bottom-nav-btn.active span {
-        font-weight: 600 !important;
+        font-weight: 600;
     }
     
-    /* Touch */
-    .bottom-nav-btn:active {
-        transform: scale(0.95) !important;
-        background: rgba(99, 102, 241, 0.1) !important;
+    /* Animation tap */
+    .bottom-nav-btn:active { 
+        transform: scale(0.92);
+    }
+    
+    @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 }
 
 @media (min-width: 769px) {
-    .bottom-nav { 
-        display: none !important; 
-    }
+    .bottom-nav { display: none !important; }
 }
