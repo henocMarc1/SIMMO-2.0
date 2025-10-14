@@ -12,9 +12,41 @@ import {
 
 class PaymentManager {
     constructor() {
-        this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
-        this.payments = JSON.parse(localStorage.getItem('payment_records')) || [];
-        this.lots = JSON.parse(localStorage.getItem('payment_lots')) || [];
+// stockage local remplacé par Firebase : on initialise vide et on installe les listeners realtime
+this.members = [];
+this.payments = [];
+this.lots = [];
+
+initRealtimeListeners() {
+  // members
+  onValue(ref(db, 'members'), snapshot => {
+    const val = snapshot.val() || {};
+    // transforme { id: data } en array [{ id, ...data }]
+    this.members = Object.entries(val).map(([id, data]) => ({ id, ...data }));
+    // appelle ton rendu / UI update existant
+    if (typeof this.renderMembers === 'function') this.renderMembers();
+    if (typeof this.updateHeaderStats === 'function') this.updateHeaderStats();
+  });
+
+  // payments
+  onValue(ref(db, 'payments'), snapshot => {
+    const val = snapshot.val() || {};
+    this.payments = Object.entries(val).map(([id, data]) => ({ id, ...data }));
+    if (typeof this.renderPayments === 'function') this.renderPayments();
+    if (typeof this.updateHeaderStats === 'function') this.updateHeaderStats();
+  });
+
+  // lots
+  onValue(ref(db, 'lots'), snapshot => {
+    const val = snapshot.val() || {};
+    this.lots = Object.entries(val).map(([id, data]) => ({ id, ...data }));
+    if (typeof this.renderLots === 'function') this.renderLots();
+    if (typeof this.updateHeaderStats === 'function') this.updateHeaderStats();
+  });
+}
+
+// initialise les ecouteurs Realtime pour remplir ces arrays depuis Firebase
+this.initRealtimeListeners();
         this.currentTab = 'dashboard';
         this.currentMonth = new Date().getMonth();
         this.currentYear = new Date().getFullYear();
@@ -2802,11 +2834,41 @@ getMonthlyTotal() {
         return new Date(dateString).toLocaleDateString('fr-FR');
     }
 
-    saveData() {
-        localStorage.setItem('payment_members', JSON.stringify(this.members));
-        localStorage.setItem('payment_records', JSON.stringify(this.payments));
-        localStorage.setItem('payment_lots', JSON.stringify(this.lots));
-    }
+    async saveData() {
+  // Écrit l'état complet en écrasant les noeuds 'members', 'payments', 'lots' dans la Realtime DB.
+  // ATTENTION : ceci remplace toute la collection côté DB. Utile si tu veux un snapshot complet.
+  try {
+    // normaliser les arrays en objet { id: item }
+    const membersObj = {};
+    this.members.forEach(item => {
+      const id = item.id || this.generateId();
+      item.id = id;
+      membersObj[id] = item;
+    });
+
+    const paymentsObj = {};
+    this.payments.forEach(item => {
+      const id = item.id || this.generateId();
+      item.id = id;
+      paymentsObj[id] = item;
+    });
+
+    const lotsObj = {};
+    this.lots.forEach(item => {
+      const id = item.id || this.generateId();
+      item.id = id;
+      lotsObj[id] = item;
+    });
+
+    await set(ref(db, 'members'), membersObj);
+    await set(ref(db, 'payments'), paymentsObj);
+    await set(ref(db, 'lots'), lotsObj);
+
+    console.log('Sauvegarde complète sur Firebase OK.');
+  } catch (err) {
+    console.error('Erreur saveData -> Firebase:', err);
+  }
+}
 
     showToast(message, type = 'success') {
         const toast = document.createElement('div');
