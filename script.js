@@ -3186,6 +3186,18 @@ document.addEventListener('DOMContentLoaded', () => {
     closeMobileMenu();
   });
 
+    // S'assurer que la navbar mobile est toujours visible
+    const mobileNav = document.querySelector('.mobile-bottom-nav');
+    if (mobileNav && window.innerWidth <= 768) {
+        mobileNav.style.display = 'flex';
+        mobileNav.style.position = 'fixed';
+        mobileNav.style.bottom = '0';
+        mobileNav.style.visibility = 'visible';
+        mobileNav.style.opacity = '1';
+    }
+});
+
+
   // bottom nav syncing
   const bottomBtns = document.querySelectorAll('.bottom-nav .nav-tab');
   bottomBtns.forEach(b=>{
@@ -3208,3 +3220,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // document.addEventListener('app:tabChange', closeMobileMenu);
 
 })();
+
+
