@@ -1,4 +1,52 @@
+// Navigation fixe permanente - iOS Style
+document.addEventListener('DOMContentLoaded', function() {
+    const bottomNav = document.querySelector('.bottom-nav');
+    
+    if (bottomNav && window.innerWidth <= 768) {
+        // Forcer l'affichage permanent
+        const forceNavVisibility = () => {
+            bottomNav.style.cssText = `
+                display: flex !important;
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+                z-index: 99999 !important;
+            `;
+        };
+        
+        forceNavVisibility();
+        
+        // Observer pour empêcher toute modification
+        const observer = new MutationObserver(() => {
+            if (window.innerWidth <= 768) {
+                forceNavVisibility();
+            }
+        });
+        
+        observer.observe(bottomNav, {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+        
+        // Bloquer les événements qui pourraient cacher la nav
+        window.addEventListener('scroll', (e) => {
+            forceNavVisibility();
+        }, { passive: true });
+        
+        window.addEventListener('touchmove', (e) => {
+            forceNavVisibility();
+        }, { passive: true });
+    }
+});
 
+// Supprimer toute fonction de masquage existante
+if (typeof hideNavbarOnScroll !== 'undefined') {
+    hideNavbarOnScroll = function() { /* Ne rien faire */ };
+}
 
 class PaymentManager {
     constructor() {
