@@ -1,5 +1,5 @@
 // ajouter après tes autres imports
-import { db } from './firebase-init.js';
+import { db } from 'firebase-init.js';
 import {
   ref,
   onValue,
