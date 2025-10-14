@@ -1,74 +1,101 @@
+
 @media (max-width: 768px) {
-    .mobile-menu { display: none !important; }
-    .header-nav { display: none !important; }
-    .app-container { padding-bottom: 85px !important; }
+    /* Masquer les éléments desktop */
+    .mobile-menu { 
+        display: flex !important;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 24px;
+        padding: 8px;
+        cursor: pointer;
+    }
     
-    /* Barre de navigation en bas */
+    .header-nav { 
+        display: none !important; 
+    }
+    
+    .app-container { 
+        padding-bottom: 85px !important; 
+    }
+    
+    /* Barre de navigation en bas - Style Glass */
     .bottom-nav {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
         z-index: 1000;
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.08);
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-        animation: slideUp 0.4s ease;
+        border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+        padding: 8px 0;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    /* Container centré */
+    /* Container centré avec espacement optimal */
     .bottom-nav-container {
         display: flex;
         justify-content: space-around;
         align-items: center;
-        padding: 10px 0;
+        max-width: 100%;
+        padding: 0 8px;
         margin: 0 auto;
+        gap: 4px;
     }
     
-    /* Boutons centrés */
+    /* Boutons optimisés pour mobile */
     .bottom-nav-btn {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 3px;
-        padding: 8px 10px;
+        gap: 4px;
+        padding: 6px 8px;
         background: transparent;
         border: none;
-        border-radius: 14px;
+        border-radius: 12px;
         flex: 1;
-        max-width: 75px;
-        transition: all 0.3s;
+        max-width: 80px;
+        min-width: 60px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
     }
     
-    /* Icône centrée */
+    /* Icônes bien dimensionnées */
     .bottom-nav-btn i {
-        font-size: 24px;
+        font-size: 22px;
         color: #6B7280;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
-        transition: all 0.3s;
+        width: 24px;
+        height: 24px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    /* Texte centré */
+    /* Texte lisible et adaptatif */
     .bottom-nav-btn span {
         font-size: 10px;
         font-weight: 500;
         color: #6B7280;
         text-align: center;
         width: 100%;
-        transition: all 0.3s;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
     }
     
-    /* État actif */
+    /* État actif amélioré */
     .bottom-nav-btn.active {
-        background: rgba(99, 102, 241, 0.12);
+        background: rgba(99, 102, 241, 0.15);
+        transform: translateY(-2px);
     }
     
     .bottom-nav-btn.active i,
@@ -77,24 +104,77 @@
     }
     
     .bottom-nav-btn.active i {
-        transform: scale(1.08);
+        transform: scale(1.1);
     }
     
     .bottom-nav-btn.active span {
         font-weight: 600;
     }
     
-    /* Animation tap */
+    /* Animation au toucher */
     .bottom-nav-btn:active { 
-        transform: scale(0.92);
+        transform: scale(0.95);
+        background: rgba(99, 102, 241, 0.1);
     }
     
+    /* Animation d'apparition */
     @keyframes slideUp {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+        from { 
+            transform: translateY(100%); 
+            opacity: 0; 
+        }
+        to { 
+            transform: translateY(0); 
+            opacity: 1; 
+        }
+    }
+    
+    /* Adaptation pour très petits écrans */
+    @media (max-width: 380px) {
+        .bottom-nav-btn {
+            padding: 6px 4px;
+            max-width: 70px;
+            min-width: 55px;
+        }
+        
+        .bottom-nav-btn i {
+            font-size: 20px;
+        }
+        
+        .bottom-nav-btn span {
+            font-size: 9px;
+        }
+    }
+    
+    /* Adaptation pour grands smartphones */
+    @media (min-width: 480px) and (max-width: 768px) {
+        .bottom-nav-container {
+            max-width: 500px;
+            gap: 8px;
+        }
+        
+        .bottom-nav-btn {
+            padding: 8px 12px;
+            max-width: 90px;
+        }
+        
+        .bottom-nav-btn i {
+            font-size: 24px;
+        }
+        
+        .bottom-nav-btn span {
+            font-size: 11px;
+        }
     }
 }
 
+/* Masquer sur desktop */
 @media (min-width: 769px) {
-    .bottom-nav { display: none !important; }
+    .bottom-nav { 
+        display: none !important; 
+    }
+    
+    .mobile-menu {
+        display: none !important;
+    }
 }
