@@ -1,40 +1,58 @@
-// FORCER LA NAVBAR À RESTER VISIBLE SUR MOBILE
-document.addEventListener('DOMContentLoaded', function() {
-    const bottomNav = document.querySelector('.bottom-nav');
-    
-    if (bottomNav && window.innerWidth <= 768) {
-        // Forcer l'affichage permanent
-        bottomNav.style.display = 'flex';
-        bottomNav.style.position = 'fixed';
-        bottomNav.style.bottom = '0';
-        bottomNav.style.visibility = 'visible';
-        bottomNav.style.opacity = '1';
-        bottomNav.style.transform = 'translateY(0)';
+// FORCER LA NAVBAR À RESTER VISIBLE - VERSION AMÉLIORÉE
+(function() {
+    function forceNavbarVisible() {
+        const bottomNav = document.querySelector('.bottom-nav');
         
-        // Empêcher tout script de la cacher
-        const observer = new MutationObserver(function() {
-            if (window.innerWidth <= 768) {
-                bottomNav.style.display = 'flex';
-                bottomNav.style.visibility = 'visible';
-                bottomNav.style.opacity = '1';
-                bottomNav.style.transform = 'translateY(0)';
-            }
-        });
-        
-        observer.observe(bottomNav, {
-            attributes: true,
-            attributeFilter: ['style', 'class']
-        });
+        if (bottomNav && window.innerWidth <= 768) {
+            // Forcer tous les styles de visibilité
+            bottomNav.style.cssText = `
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+                z-index: 99999 !important;
+            `;
+        }
     }
     
-    // Désactiver tout événement scroll qui cache la navbar
-    window.removeEventListener('scroll', hideNavbarOnScroll);
-});
-
-// Fonction vide pour remplacer d'éventuelles fonctions de masquage
-function hideNavbarOnScroll() {
-    // Ne rien faire - navbar toujours visible
-}
+    // Appliquer au chargement
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', forceNavbarVisible);
+    } else {
+        forceNavbarVisible();
+    }
+    
+    // Réappliquer lors du scroll
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            window.requestAnimationFrame(function() {
+                forceNavbarVisible();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+    
+    // Observer les changements de style
+    const observer = new MutationObserver(forceNavbarVisible);
+    
+    // Attendre que le DOM soit prêt
+    const checkNav = setInterval(function() {
+        const nav = document.querySelector('.bottom-nav');
+        if (nav) {
+            observer.observe(nav, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+            clearInterval(checkNav);
+        }
+    }, 100);
+})();
 
 class PaymentManager {
     constructor() {
