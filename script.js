@@ -546,6 +546,7 @@ getSvgIcon(name, size = 20) {
     }
 
     init() {
+        this.loadFromFirebase();
         this.setupEventListeners();
         this.setupMemberEventListeners();
         this.loadDefaultLots();
