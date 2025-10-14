@@ -1,64 +1,13 @@
-  m// script.js (début) — ajouter ces imports
-
-import { ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
-
 class PaymentManager {
     constructor() {
-// dans constructor()
-this.members = [];
-this.payments = [];
-this.lots = [];
-// démarre l'init asynchrone Firebase puis UI
-this.initFirebase().then(() => {
-  
+        this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
+        this.payments = JSON.parse(localStorage.getItem('payment_records')) || [];
+        this.lots = JSON.parse(localStorage.getItem('payment_lots')) || [];
         this.currentTab = 'dashboard';
         this.currentMonth = new Date().getMonth();
         this.currentYear = new Date().getFullYear();
-        this.init(); // votre init() existant (setup listeners, UI, etc.)
-});
-
-// charge une fois depuis Firebase (si vous voulez seulement read-once)
-async loadFromFirebaseOnce() {
-  try {
-    const membersSnap = await get(ref(db, 'members'));
-    this.members = membersSnap.exists() ? Object.values(membersSnap.val()) : [];
-
-    const paymentsSnap = await get(ref(db, 'payments'));
-    this.payments = paymentsSnap.exists() ? Object.values(paymentsSnap.val()) : [];
-
-    const lotsSnap = await get(ref(db, 'lots'));
-    this.lots = lotsSnap.exists() ? Object.values(lotsSnap.val()) : [];
-  } catch (err) {
-    console.error('Erreur lecture Firebase:', err);
-    this.showToast('Erreur connexion base Firebase', 'error');
-  }
-}
-
-// ou : écoute en temps réel (update UI automatiquement)
-setupRealtimeListeners() {
-  onValue(ref(db, 'members'), snapshot => {
-    this.members = snapshot.exists() ? Object.values(snapshot.val()) : [];
-    this.updateUI();
-    this.updateStats();
-  });
-
-  onValue(ref(db, 'payments'), snapshot => {
-    this.payments = snapshot.exists() ? Object.values(snapshot.val()) : [];
-    this.updateUI();
-    this.updateStats();
-  });
-
-  onValue(ref(db, 'lots'), snapshot => {
-    this.lots = snapshot.exists() ? Object.values(snapshot.val()) : [];
-    this.updateUI();
-  });
-}
-
-// méthode d'init firebase combinée
-async initFirebase() {
-  await this.loadFromFirebaseOnce();    // read initial snapshot
-  this.setupRealtimeListeners();       // (optionnel) garder DB en temps réel
-}
+        this.init();
+    }
 
 getSvgIcon(name, size = 20) {
     const s = Number(size);
@@ -2841,23 +2790,11 @@ getMonthlyTotal() {
         return new Date(dateString).toLocaleDateString('fr-FR');
     }
 
-    async saveData() {
-  try {
-    // transforme tableaux en objets indexés par id (meilleur pour Realtime DB)
-    const membersObj = this.members.reduce((acc, m) => { acc[m.id] = m; return acc; }, {});
-    const paymentsObj = this.payments.reduce((acc, p) => { acc[p.id] = p; return acc; }, {});
-    const lotsObj = this.lots.reduce((acc, l) => { acc[l.id] = l; return acc; }, {});
-
-    await set(ref(db, 'members'), membersObj);
-    await set(ref(db, 'payments'), paymentsObj);
-    await set(ref(db, 'lots'), lotsObj);
-
-    this.showToast('Données synchronisées avec Firebase', 'success');
-  } catch (err) {
-    console.error('Erreur écriture Firebase:', err);
-    this.showToast('Erreur sauvegarde sur Firebase', 'error');
-  }
-}
+    saveData() {
+        localStorage.setItem('payment_members', JSON.stringify(this.members));
+        localStorage.setItem('payment_records', JSON.stringify(this.payments));
+        localStorage.setItem('payment_lots', JSON.stringify(this.lots));
+    }
 
     showToast(message, type = 'success') {
         const toast = document.createElement('div');
@@ -3196,4 +3133,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // si tu as un event dispatcher lors du changement d'onglet, lier ici:
   // document.addEventListener('app:tabChange', closeMobileMenu);
 
+})();
 })();
