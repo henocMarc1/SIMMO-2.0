@@ -1,3 +1,15 @@
+// ajouter après tes autres imports
+import { db } from './firebase-init.js';
+import {
+  ref,
+  onValue,
+  push,
+  set,
+  update,
+  remove,
+  get
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+
 class PaymentManager {
     constructor() {
         this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
