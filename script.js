@@ -1,13 +1,24 @@
+// ========== IMPORTS FIREBASE ==========
+import { database } from './firebase-config.js';
+import { ref, set, get, push, update, remove, onValue } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+
+
 class PaymentManager {
     constructor() {
-        this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
-        this.payments = JSON.parse(localStorage.getItem('payment_records')) || [];
-        this.lots = JSON.parse(localStorage.getItem('payment_lots')) || [];
-        this.currentTab = 'dashboard';
-        this.currentMonth = new Date().getMonth();
-        this.currentYear = new Date().getFullYear();
-        this.init();
-    }
+    // Références Firebase
+    this.membersRef = ref(database, 'members');
+    this.paymentsRef = ref(database, 'payments');
+    this.lotsRef = ref(database, 'lots');
+    
+    // Arrays locaux (synchronisés avec Firebase)
+    this.members = [];
+    this.payments = [];
+    this.lots = [];
+    this.currentTab = 'dashboard';
+    this.currentMonth = new Date().getMonth();
+    this.currentYear = new Date().getFullYear();
+    this.init();
+}
 
 getSvgIcon(name, size = 20) {
     const s = Number(size);
@@ -510,14 +521,70 @@ getSvgIcon(name, size = 20) {
         }, 3000);
     }
 
-    init() {
-        this.setupEventListeners();
-        this.setupMemberEventListeners();
-        this.loadDefaultLots();
-        this.updateUI();
-        this.updateStats();
-        this.populateFilters();
+    async init() {
+    // Charger les données depuis Firebase
+    await this.loadDataFromFirebase();
+    
+    // Écouter les changements en temps réel
+    this.setupRealtimeListeners();
+    
+    // Initialiser l'interface (garder votre code existant)
+    this.setupEventListeners();
+    this.updateDashboard();
+}
+
+async loadDataFromFirebase() {
+    try {
+        const membersSnapshot = await get(this.membersRef);
+        if (membersSnapshot.exists()) {
+            const data = membersSnapshot.val();
+            this.members = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        }
+
+        const paymentsSnapshot = await get(this.paymentsRef);
+        if (paymentsSnapshot.exists()) {
+            const data = paymentsSnapshot.val();
+            this.payments = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        }
+
+        const lotsSnapshot = await get(this.lotsRef);
+        if (lotsSnapshot.exists()) {
+            const data = lotsSnapshot.val();
+            this.lots = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        }
+    } catch (error) {
+        console.error('Erreur chargement Firebase:', error);
     }
+}
+
+setupRealtimeListeners() {
+    onValue(this.membersRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            this.members = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            this.updateDashboard();
+            if (this.currentTab === 'members') this.renderMembers();
+        }
+    });
+
+    onValue(this.paymentsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            this.payments = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            this.updateDashboard();
+            if (this.currentTab === 'payments') this.renderPayments();
+        }
+    });
+
+    onValue(this.lotsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            this.lots = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            this.updateDashboard();
+            if (this.currentTab === 'lots') this.renderLots();
+        }
+    });
+}
 
 
 
@@ -2790,10 +2857,47 @@ getMonthlyTotal() {
         return new Date(dateString).toLocaleDateString('fr-FR');
     }
 
-    saveData() {
-        localStorage.setItem('payment_members', JSON.stringify(this.members));
-        localStorage.setItem('payment_records', JSON.stringify(this.payments));
-        localStorage.setItem('payment_lots', JSON.stringify(this.lots));
+    async addMember(memberData) {
+        const newMember = await this.firebaseManager.addMember(memberData);
+        this.showNotification('Membre ajouté avec succès !', 'success');
+        return newMember;
+    }
+
+    async updateMember(memberId, updates) {
+        await this.firebaseManager.updateMember(memberId, updates);
+        this.showNotification('Membre mis à jour !', 'success');
+    }
+
+    async deleteMember(memberId) {
+        await this.firebaseManager.deleteMember(memberId);
+        this.showNotification('Membre supprimé !', 'success');
+    }
+
+    async addPayment(paymentData) {
+        const newPayment = await this.firebaseManager.addPayment(paymentData);
+        this.showNotification('Paiement enregistré !', 'success');
+        return newPayment;
+    }
+
+    async deletePayment(paymentId) {
+        await this.firebaseManager.deletePayment(paymentId);
+        this.showNotification('Paiement supprimé !', 'success');
+    }
+
+    async addLot(lotData) {
+        const newLot = await this.firebaseManager.addLot(lotData);
+        this.showNotification('Lot ajouté !', 'success');
+        return newLot;
+    }
+
+    async updateLot(lotId, updates) {
+        await this.firebaseManager.updateLot(lotId, updates);
+        this.showNotification('Lot mis à jour !', 'success');
+    }
+
+    async deleteLot(lotId) {
+        await this.firebaseManager.deleteLot(lotId);
+        this.showNotification('Lot supprimé !', 'success');
     }
 
     showToast(message, type = 'success') {
