@@ -17,7 +17,7 @@
         padding-bottom: 90px !important;
     }
     
-    /* NAVBAR TOUJOURS FIXÉE EN BAS */
+    /* NAVBAR TOUJOURS FIXÉE EN BAS - VISIBLE EN PERMANENCE */
     .bottom-nav {
         position: fixed !important;
         bottom: 0 !important;
@@ -25,19 +25,30 @@
         right: 0 !important;
         width: 100% !important;
         z-index: 99999 !important;
-        background: rgba(255, 255, 255, 0.95) !important;
+        
+        /* Effet Liquid Glass */
+        background: rgba(255, 255, 255, 0.7) !important;
         backdrop-filter: blur(20px) saturate(180%) !important;
         -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-        border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15) !important;
+        
+        border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 
+            0 -4px 24px rgba(0, 0, 0, 0.1),
+            0 -1px 0 rgba(255, 255, 255, 0.5) inset !important;
+        
         padding: 10px 0 !important;
         padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+        
+        /* Forcer la visibilité permanente */
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         transform: translateY(0) !important;
         transition: none !important;
         pointer-events: all !important;
+        
+        /* Empêcher tout masquage */
+        will-change: auto !important;
     }
     
     /* Container */
@@ -90,9 +101,11 @@
         text-overflow: ellipsis !important;
     }
     
-    /* État actif */
+    /* État actif avec effet Glass */
     .bottom-nav-btn.active {
         background: rgba(99, 102, 241, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
     }
     
     .bottom-nav-btn.active i,
@@ -110,10 +123,12 @@
         font-weight: 600 !important;
     }
     
-    /* Touch */
+    /* Touch avec effet Glass */
     .bottom-nav-btn:active {
         transform: scale(0.95) !important;
-        background: rgba(99, 102, 241, 0.1) !important;
+        background: rgba(99, 102, 241, 0.2) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
     }
 }
 
