@@ -1,51 +1,13 @@
 class PaymentManager {
     constructor() {
-// AJOUTER:
-this.db = firebase.database();
-this.members = [];
-this.payments = [];
-this.lots = [];
-this.loadData();
+        this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
+        this.payments = JSON.parse(localStorage.getItem('payment_records')) || [];
+        this.lots = JSON.parse(localStorage.getItem('payment_lots')) || [];
         this.currentTab = 'dashboard';
         this.currentMonth = new Date().getMonth();
         this.currentYear = new Date().getFullYear();
         this.init();
     }
-    
-    loadData() {
-    // Charger membres
-    this.db.ref('members').on('value', (snapshot) => {
-        this.members = snapshot.val() || [];
-        this.renderMembers();
-        this.updateDashboard();
-    });
-
-    // Charger paiements
-    this.db.ref('payments').on('value', (snapshot) => {
-        this.payments = snapshot.val() || [];
-        this.renderPayments();
-        this.updateDashboard();
-    });
-
-    // Charger lots
-    this.db.ref('lots').on('value', (snapshot) => {
-        this.lots = snapshot.val() || [];
-        this.renderLots();
-        this.updateDashboard();
-    });
-}
-
-saveMembers() {
-    this.db.ref('members').set(this.members);
-}
-
-savePayments() {
-    this.db.ref('payments').set(this.payments);
-}
-
-saveLots() {
-    this.db.ref('lots').set(this.lots);
-}
 
 getSvgIcon(name, size = 20) {
     const s = Number(size);
@@ -2829,9 +2791,9 @@ getMonthlyTotal() {
     }
 
     saveData() {
-this. saveMembers() ;
-this. savePayments() ;
-this. saveLots() ;
+        localStorage.setItem('payment_members', JSON.stringify(this.members));
+        localStorage.setItem('payment_records', JSON.stringify(this.payments));
+        localStorage.setItem('payment_lots', JSON.stringify(this.lots));
     }
 
     showToast(message, type = 'success') {
@@ -3089,8 +3051,8 @@ let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new PaymentManager();
 });
-/* ---------- Mobile menu toggle ---------- */
-document.addEventListener('DOMContentLoaded', function() {
+/* ---------- Mobile menu toggle (ajouter à la fin de script.js) ---------- */
+(function(){
   const mobileBtn = document.getElementById('mobileMenuBtn');
   if(!mobileBtn) return;
 
@@ -3107,6 +3069,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="mobile-nav-list">
           ${Array.from(document.querySelectorAll('.header-nav .nav-tab')).map(btn=>{
+            const label = btn.textContent.trim();
             const tab = btn.getAttribute('data-tab') || '';
             return `<button class="nav-tab" data-tab="${tab}">${btn.innerHTML}</button>`;
           }).join('')}
@@ -3116,6 +3079,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(overlay);
   }
 
+  const panel = overlay.querySelector('.mobile-nav-panel');
   const closeBtn = document.getElementById('mobileMenuClose');
 
   function openMobileMenu(){
@@ -3135,27 +3099,38 @@ document.addEventListener('DOMContentLoaded', function() {
     if(e.target === overlay) closeMobileMenu();
   });
 
+  // when user clicks any nav inside overlay -> switch tab (reuse existing handlers)
   overlay.addEventListener('click', (e)=>{
     const t = e.target.closest('.nav-tab');
     if(!t) return;
     const tabName = t.getAttribute('data-tab');
     if(tabName){
+      // simulate click on desktop nav-tab counterpart (so existing logic runs)
       const desktop = document.querySelector('.header-nav .nav-tab[data-tab="'+tabName+'"]');
       if(desktop) desktop.click();
     }
     closeMobileMenu();
   });
 
+  // bottom nav syncing
   const bottomBtns = document.querySelectorAll('.bottom-nav .nav-tab');
   bottomBtns.forEach(b=>{
     b.addEventListener('click', ()=>{
       const tab = b.getAttribute('data-tab');
+      // trigger desktop nav button
       const desktop = document.querySelector('.header-nav .nav-tab[data-tab="'+tab+'"]');
       if(desktop) desktop.click();
+      // update active styles
       document.querySelectorAll('.bottom-nav .nav-tab').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
+      // ensure we close mobile panel if open
       const ov = document.querySelector('.mobile-nav-overlay');
       if(ov && ov.style.display === 'flex') ov.style.display = 'none';
     });
   });
-});
+
+  // close overlay when content changed by your existing tab logic (optional)
+  // si tu as un event dispatcher lors du changement d'onglet, lier ici:
+  // document.addEventListener('app:tabChange', closeMobileMenu);
+
+})();
