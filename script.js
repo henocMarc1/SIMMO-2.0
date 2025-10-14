@@ -1,51 +1,52 @@
-
-
 class PaymentManager {
     constructor() {
-// AJOUTER CES LIGNES:
-this.storage = new FirebaseStorage();
+// AJOUTER:
+this.db = firebase.database();
 this.members = [];
 this.payments = [];
 this.lots = [];
-this.loadDataFromFirebase();
+this.loadData();
         this.currentTab = 'dashboard';
         this.currentMonth = new Date().getMonth();
         this.currentYear = new Date().getFullYear();
         this.init();
     }
     
-
-async loadDataFromFirebase() {
-    try {
-        this.members = await this.storage.getMembers();
-        this.payments = await this.storage.getPayments();
-        this.lots = await this.storage.getLots();
-        
-        // Synchronisation en temps réel
-        this.storage.onMembersChange((members) => {
-            this.members = members;
-            this.renderMembers();
-            this.updateDashboard();
-        });
-        
-        this.storage.onPaymentsChange((payments) => {
-            this.payments = payments;
-            this.renderPayments();
-            this.updateDashboard();
-        });
-        
-        this.storage.onLotsChange((lots) => {
-            this.lots = lots;
-            this.renderLots();
-            this.updateDashboard();
-        });
-        
+    loadData() {
+    // Charger membres
+    this.db.ref('members').on('value', (snapshot) => {
+        this.members = snapshot.val() || [];
+        this.renderMembers();
         this.updateDashboard();
-    } catch (error) {
-        console.error('Erreur chargement Firebase:', error);
-        this.showNotification('Erreur de chargement des données', 'error');
-    }
+    });
+
+    // Charger paiements
+    this.db.ref('payments').on('value', (snapshot) => {
+        this.payments = snapshot.val() || [];
+        this.renderPayments();
+        this.updateDashboard();
+    });
+
+    // Charger lots
+    this.db.ref('lots').on('value', (snapshot) => {
+        this.lots = snapshot.val() || [];
+        this.renderLots();
+        this.updateDashboard();
+    });
 }
+
+saveMembers() {
+    this.db.ref('members').set(this.members);
+}
+
+savePayments() {
+    this.db.ref('payments').set(this.payments);
+}
+
+saveLots() {
+    this.db.ref('lots').set(this.lots);
+}
+
 getSvgIcon(name, size = 20) {
     const s = Number(size);
     const common = `width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"`;
@@ -2828,10 +2829,9 @@ getMonthlyTotal() {
     }
 
     saveData() {
-        await this.storage.saveMembers(this.members);
-        await this.storage.savePayments(this.payments);
-await this.storage.saveLots(this.lots);
-
+this. saveMembers() ;
+this. savePayments() ;
+this. saveLots() ;
     }
 
     showToast(message, type = 'success') {
