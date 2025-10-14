@@ -1,14 +1,51 @@
+import { FirebaseStorage } from './firebase-config.js';
+
 class PaymentManager {
     constructor() {
-        this.members = JSON.parse(localStorage.getItem('payment_members')) || [];
-        this.payments = JSON.parse(localStorage.getItem('payment_records')) || [];
-        this.lots = JSON.parse(localStorage.getItem('payment_lots')) || [];
+// AJOUTER CES LIGNES:
+this.storage = new FirebaseStorage();
+this.members = [];
+this.payments = [];
+this.lots = [];
+this.loadDataFromFirebase();
         this.currentTab = 'dashboard';
         this.currentMonth = new Date().getMonth();
         this.currentYear = new Date().getFullYear();
         this.init();
     }
+    
 
+async loadDataFromFirebase() {
+    try {
+        this.members = await this.storage.getMembers();
+        this.payments = await this.storage.getPayments();
+        this.lots = await this.storage.getLots();
+        
+        // Synchronisation en temps réel
+        this.storage.onMembersChange((members) => {
+            this.members = members;
+            this.renderMembers();
+            this.updateDashboard();
+        });
+        
+        this.storage.onPaymentsChange((payments) => {
+            this.payments = payments;
+            this.renderPayments();
+            this.updateDashboard();
+        });
+        
+        this.storage.onLotsChange((lots) => {
+            this.lots = lots;
+            this.renderLots();
+            this.updateDashboard();
+        });
+        
+        this.updateDashboard();
+    } catch (error) {
+        console.error('Erreur chargement Firebase:', error);
+        this.showNotification('Erreur de chargement des données', 'error');
+    }
+}
 getSvgIcon(name, size = 20) {
     const s = Number(size);
     const common = `width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"`;
@@ -2791,9 +2828,10 @@ getMonthlyTotal() {
     }
 
     saveData() {
-        localStorage.setItem('payment_members', JSON.stringify(this.members));
-        localStorage.setItem('payment_records', JSON.stringify(this.payments));
-        localStorage.setItem('payment_lots', JSON.stringify(this.lots));
+        await this.storage.saveMembers(this.members);
+        await this.storage.savePayments(this.payments);
+await this.storage.saveLots(this.lots);
+
     }
 
     showToast(message, type = 'success') {
