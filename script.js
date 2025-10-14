@@ -1,5 +1,5 @@
-// script.js (début) — ajouter ces imports
-import { db } from './firebase-init.js';
+  m// script.js (début) — ajouter ces imports
+
 import { ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
 class PaymentManager {
