@@ -3170,5 +3170,3 @@ document.addEventListener('DOMContentLoaded', () => {
   // document.addEventListener('app:tabChange', closeMobileMenu);
 
 })();
-
-
