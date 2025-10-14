@@ -1,5 +1,3 @@
-
-
 class PaymentManager {
     constructor() {
      this.db = firebase.database();
